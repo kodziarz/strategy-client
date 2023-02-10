@@ -1,0 +1,47 @@
+Locations of enviroments:
+
+TS front-end source files:
+./frontEndServer/frontEndTs/*
+
+front-end hosting server source file:
+./frontEndServer/index.js
+
+back-end server source files:
+./server/src/*
+
+
+front-end installation:
+./frontEndServer
+
+npm install webpack webpack-cli --save-dev
+npm install typescript
+npm install three
+npm install --save @types/three
+npm install typedi reflect-metadata
+npm install --save react
+npm install --save react-dom
+npm install --save typescript @types/node @types/react @types/react-dom @types/jest
+npm install socket.io-client
+npm install js-cookie
+npm i @types/js-cookie
+
+compiling:
+npm run dev
+or
+npm run prod
+
+
+front-end hosting server installation:
+./frontEndServer
+
+npm install express
+
+
+back-end server installation:
+./
+npm install -g @nestjs/cli
+//new server (to get proper initial node_modules directory and move to current):
+nest new tmp
+
+./server
+npm i --save @nestjs/websockets npm install @nestjs/platform-socket.io
