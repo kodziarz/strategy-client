@@ -1,0 +1,34 @@
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+/* w sumie nie wiem, czy powinienem dodawać style z pliku game.html do tego pliku,
+ale w sumie tymczasowo wyrąbane xd */
+
+body {
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+#main {
+    position: relative;
+}
+
+#uiDiv {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#root3d {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
