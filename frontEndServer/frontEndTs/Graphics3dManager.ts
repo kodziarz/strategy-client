@@ -1,13 +1,12 @@
 import * as THREE from "three";
 import { Service } from "typedi";
 import SETTINGS from "./SETTINGS.json";
-
+import { OrbitControls } from 'three-orbitcontrols-ts';
 /**
  * Manages displaying 3d map.
  */
 @Service()
 export default class Graphics3dManager {
-
     private rootDiv: HTMLDivElement;
     private scene = new THREE.Scene();
     private camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -15,6 +14,7 @@ export default class Graphics3dManager {
     private cube: THREE.Mesh = null;
     private gameMechanicsInterval: NodeJS.Timer;
     private beginningTime: number;
+    private orbitControls: OrbitControls;
 
     constructor() {
         console.log("konstruktor managera się odpalił");
@@ -28,8 +28,11 @@ export default class Graphics3dManager {
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         this.cube = new THREE.Mesh(geometry, material);
         this.scene.add(this.cube);
-
         this.camera.position.z = 5;
+
+        this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.orbitControls.enableZoom = true;
+        this.orbitControls.enablePan = true;
         this.render();
 
         const deltaTime = SETTINGS.GAME_MECHANICS_INTERVAL / 1000;
@@ -51,6 +54,7 @@ export default class Graphics3dManager {
     render = () => {
         requestAnimationFrame(this.render);
         this.renderer.render(this.scene, this.camera);
+        this.orbitControls.update();
     }
 
     /**
