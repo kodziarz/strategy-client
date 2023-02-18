@@ -10,13 +10,22 @@ export default class SocketManager {
     private socket: Socket;
 
     constructor() {
-        this.socket = io("ws://localhost:3000");
+        this.socket = io("ws://localhost:3000", {
+            transportOptions: {
+                polling: {
+                    extraHeaders: {
+                        Authorization: "Bearer " + Cookies.get("token")
+                    }
+                }
+            }
+        });
         this.socket.on("connect", () => {
             console.log("uzyskano połączenie z serwerem.");
-            this.socket.on("join", (data) => { console.log("Serwer odpowiedział: ", data); })
+            this.socket.on("join", (data) => { console.log("Serwer odpowiedział: ", data); });
             // let user: { userId: number } = JSON.parse(Cookies.get("user"));
             // this.socket.emit("join", { id: user.userId, data: "Halo, halo, odbiór." });
-            this.socket.emit("join", { data: "Halo, halo, odbiór." });
-        })
+            // this.socket.emit("join", { data: "Halo, halo, odbiór." });
+            this.socket.emit("test", { random: "data" });
+        });
     }
 }
