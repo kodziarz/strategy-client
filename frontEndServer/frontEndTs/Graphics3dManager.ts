@@ -51,7 +51,7 @@ export default class Graphics3dManager {
     render = () => {
         requestAnimationFrame(this.render);
         this.renderer.render(this.scene, this.camera);
-    }
+    };
 
     /**
      * Powers game mechanics by regular invocation of given methods.
@@ -63,7 +63,7 @@ export default class Graphics3dManager {
     initGameMechanics = (deltaTime: number, intervenedTime: number) => {
 
         this.moveCube(deltaTime, intervenedTime);
-    }
+    };
 
     /**
      * @example
@@ -71,7 +71,7 @@ export default class Graphics3dManager {
     moveCube = (deltaTime: number, intervenedTime: number) => {
         this.cube.rotation.x += 0.6 * deltaTime;
         this.cube.position.x = Math.sin(intervenedTime / 1000) * 5;
-    }
+    };
 
 
 }

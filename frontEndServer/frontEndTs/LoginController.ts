@@ -2,7 +2,7 @@ import Cookies from 'js-cookie';
 
 interface userCredentials {
     username: string,
-    password: string
+    password: string;
 }
 
 export default class LoginController {
@@ -20,7 +20,7 @@ export default class LoginController {
         loginButton.onclick = this.onLogin;
     }
 
-    onLogin = async () => { //TMP: jakby co, zmieniłem nazwę, bo się pokrywała z nazwą pola login
+    onLogin = async () => {
         console.log('login: ', this.username);
         console.log('haslo: ', this.password);
         const data: userCredentials = {
@@ -34,7 +34,7 @@ export default class LoginController {
                 'content-type': 'application/json',
             },
             body: JSON.stringify(data)
-        }
+        };
 
         console.log("this.url: ", this.url);
         let response = await fetch(this.url, options);
@@ -49,14 +49,14 @@ export default class LoginController {
                 alert('błędne dane');
             }
         }
-    }
+    };
 
     setUsername = (username: string) => {
         this.username = username;
-    }
+    };
 
     setPassword = (pass: string) => {
         this.password = pass;
-    }
+    };
 }
 const loginController = new LoginController();
