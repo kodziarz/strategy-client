@@ -21,8 +21,6 @@ export default class LoginController {
     }
 
     onLogin = async () => {
-        console.log('login: ', this.username);
-        console.log('haslo: ', this.password);
         const data: userCredentials = {
             username: this.username,
             password: this.password
@@ -36,14 +34,12 @@ export default class LoginController {
             body: JSON.stringify(data)
         };
 
-        console.log("this.url: ", this.url);
         let response = await fetch(this.url, options);
         if (!response.ok) console.log('nie udało się wykonać zapytania');
         else {
             const data = await response.json();
             if (response.status === 201) {
                 Cookies.set("token", data.access_token);
-                console.log(data);
                 document.location.href = "game.html";
             } else {
                 alert('błędne dane');

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Service } from "typedi";
 import SETTINGS from "./SETTINGS.json";
-import { OrbitControls } from 'three-orbitcontrols-ts';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 /**
  * Manages displaying 3d map.
  */
@@ -17,8 +17,6 @@ export default class Graphics3dManager {
     private orbitControls: OrbitControls;
 
     constructor() {
-        console.log("konstruktor managera się odpalił");
-
         this.rootDiv = document.getElementById("root3d") as HTMLDivElement;
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
