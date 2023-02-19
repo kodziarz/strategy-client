@@ -7,7 +7,7 @@ import { Service } from "typedi";
  */
 @Service()
 export default class SocketManager {
-    private socket: Socket;
+    private readonly socket: Socket;
 
     constructor() {
         this.socket = io("ws://localhost:3000", {
@@ -19,13 +19,18 @@ export default class SocketManager {
                 }
             }
         });
+        this.setEventListeners();
+    }
+
+    private setEventListeners = () => {
         this.socket.on("connect", () => {
             console.log("uzyskano połączenie z serwerem.");
-            this.socket.on("join", (data) => { console.log("Serwer odpowiedział: ", data); });
-            // let user: { userId: number } = JSON.parse(Cookies.get("user"));
-            // this.socket.emit("join", { id: user.userId, data: "Halo, halo, odbiór." });
-            // this.socket.emit("join", { data: "Halo, halo, odbiór." });
             this.socket.emit("test", { random: "data" });
+            this.socket.emit("map");
         });
-    }
+
+        this.socket.on("map", (data) => {
+            console.log("odebrano wydarzenie map: ", data);
+        });
+    };
 }

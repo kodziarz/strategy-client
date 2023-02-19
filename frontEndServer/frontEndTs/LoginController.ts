@@ -38,13 +38,28 @@ export default class LoginController {
         if (!response.ok) console.log('nie udało się wykonać zapytania');
         else {
             const data = await response.json();
+
             if (response.status === 201) {
                 Cookies.set("token", data.access_token);
+                await this.joinGame(data.access_token);
                 document.location.href = "game.html";
             } else {
                 alert('błędne dane');
             }
         }
+    };
+
+    joinGame = async (token: string) => {
+        console.log("asking for joining game");
+        const options = {
+            headers: {
+                'Authorization': "Bearer " + Cookies.get("token")
+            }
+        };
+
+        let response = await fetch("http://localhost:3000/joinGame", options);
+        let responseText = await response.text();
+        return responseText;
     };
 
     setUsername = (username: string) => {

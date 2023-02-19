@@ -35,13 +35,3 @@ front-end hosting server installation:
 ./frontEndServer
 
 npm install express
-
-
-back-end server installation:
-./
-npm install -g @nestjs/cli
-//new server (to get proper initial node_modules directory and move to current):
-nest new tmp
-
-./server
-npm i --save @nestjs/websockets npm install @nestjs/platform-socket.io
