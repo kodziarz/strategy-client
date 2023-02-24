@@ -1,0 +1,22 @@
+Plan dzialania (mocno wstępny xd):
+
++ wyświetlanie płaskiego gruntu (na razie bez tekstur nawet)
++ implementacja orbit controllsów
+-/+ sposób przechowywania danych o budynkach na serwerze
+pewnie coś w stylu listy przechowyującej obiekty dziedziczące po jakimś
+obiekcie Building czy coś
+- przesuwanie kamery poprzez podjeżdżanie myszą do krawędzi ekranu
+(pole target OrbitControlsów) - będzie walka z reactem xd
+- stawianie budynków na frontendzie (jakieś prowizoryczne kostki)
+- generowanie surowców na mapie (serwer) - na początku wystarczy jeden
+- wyświetlanie zasobów na mapie (frontend)
+----- swego rodzaju II etap
+- implementacja biegu czasu w grze (np. surowce muszą być wydobywane)
+- rozróżnienie pomiędzy budynkami - kopalnia, huta, koszary (na razie bez ludzi),
+- piechur
+...
+
+do dopracowania (nie pilne):
++ sposób rozdzielania i adresowania zapytań, do gier na serwerze
+(żeby mogło chodzić wiele jednocześnie),
+- projekt UI
