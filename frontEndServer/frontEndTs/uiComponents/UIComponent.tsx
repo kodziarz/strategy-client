@@ -36,6 +36,11 @@ export default class UIComponent extends React.Component {
                 this.graphics3dManager.cameraYVelocity = (bottomBorder - e.clientY) / topBorder;
             else this.graphics3dManager.cameraYVelocity = 0;
         });
+
+        window.addEventListener("mouseout", () => {
+            this.graphics3dManager.cameraXVelocity = 0;
+            this.graphics3dManager.cameraYVelocity = 0;
+        });
     }
 
 
