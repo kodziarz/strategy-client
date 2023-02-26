@@ -38,7 +38,6 @@ export default class SocketManager {
         this.socket.on("map", (data) => {
             console.log("odebrano wydarzenie map: ", data);
             data.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
-                console.log("this.instantiateMapField(mapFieldData): ", this.instantiateMapField(mapFieldData));
                 return this.instantiateMapField(mapFieldData);
             });
 

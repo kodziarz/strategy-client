@@ -11,5 +11,14 @@ export default class SETTINGS {
     /**Length of {@link MapField} side. */
     static readonly mapFieldSide = 20 * SETTINGS.unit;
 
+    /**Fraction of viewport's width/height on which camera movement is enabled. */
+    static readonly cameraMovingScreenPart = 0.1;
+    /**
+     * Coefficient describing a relation between camera z position (height)
+     * and the camera velocity. Actual velocity is also dependent on mouse
+     * position. Negative, because the z position of camera is negative.
+     */
+    static readonly cameraVelocityToZPositionCoeffictient = 2;
+
     static readonly GAME_MECHANICS_INTERVAL = 50;
 };

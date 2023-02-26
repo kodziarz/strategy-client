@@ -7,23 +7,21 @@ interface userCredentials {
 
 export default class LoginController {
     private url: string = 'http://localhost:3000/login';
-    private username: string;
-    private password: string;
+    private loginInput: HTMLInputElement;
+    private passwordInput: HTMLInputElement;
+
     constructor() {
-        const loginInput = document.getElementById('loginInput');
-        loginInput.oninput = () => this.setUsername((loginInput as HTMLInputElement).value);
+        this.loginInput = document.getElementById('loginInput') as HTMLInputElement;
+        this.passwordInput = document.getElementById('passwordInput') as HTMLInputElement;
 
-        const passwordInput = document.getElementById('passwordInput');
-        passwordInput.oninput = () => this.setPassword((passwordInput as HTMLInputElement).value);
-
-        const loginButton = document.getElementById('loginButton');
+        const loginButton = document.getElementById('loginButton') as HTMLInputElement;
         loginButton.onclick = this.onLogin;
     }
 
     onLogin = async () => {
         const data: userCredentials = {
-            username: this.username,
-            password: this.password
+            username: this.loginInput.value,
+            password: this.passwordInput.value
         };
 
         const options = {
@@ -60,14 +58,6 @@ export default class LoginController {
         let response = await fetch("http://localhost:3000/joinGame", options);
         let responseText = await response.text();
         return responseText;
-    };
-
-    setUsername = (username: string) => {
-        this.username = username;
-    };
-
-    setPassword = (pass: string) => {
-        this.password = pass;
     };
 }
 const loginController = new LoginController();

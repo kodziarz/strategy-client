@@ -3,7 +3,7 @@ var config = {
     module: {}
 };
 
-var gameConfig = Object.assign({}, config, {
+var loginConfig = Object.assign({}, config, {
     entry: './frontEndTs/LoginController.ts',
     output: {
         path: path.resolve(__dirname, "..", "frontEnd", "js"),
@@ -22,9 +22,9 @@ var gameConfig = Object.assign({}, config, {
         extensions: ['.tsx', '.ts', '.js']
     },
     watch: true
-})
+});
 
-var loginConfig = Object.assign({}, config, {
+var gameConfig = Object.assign({}, config, {
     entry: './frontEndTs/main.ts',
     output: {
         path: path.resolve(__dirname, "..", "frontEnd", "js"),
@@ -43,7 +43,7 @@ var loginConfig = Object.assign({}, config, {
         extensions: ['.tsx', '.ts', '.js']
     },
     watch: true
-})
+});
 
 module.exports = [loginConfig, gameConfig];
 

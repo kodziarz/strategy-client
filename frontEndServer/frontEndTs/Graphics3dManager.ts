@@ -23,6 +23,20 @@ export default class Graphics3dManager {
     private beginningTime: number;
     private orbitControls: OrbitControls;
 
+    /**
+     * If negative, camera moves to the left, if positive, moves to the right,
+     * otherwise does not move.
+     * Varies between -1 and 1.
+     */
+    cameraXVelocity = 0;
+
+    /**
+     * if negative, camera moves up, if positive, moves down, otherwise
+     * does not move.
+     * Varies between -1 and 1.
+     */
+    cameraYVelocity = 0;
+
     constructor() {
         this.rootDiv = document.getElementById("root3d") as HTMLDivElement;
 
@@ -36,9 +50,11 @@ export default class Graphics3dManager {
         let axes = new THREE.AxesHelper(500);
         this.scene.add(axes);
 
+        this.camera.up.set(0, 0, 1);
         this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
         this.orbitControls.enableZoom = true;
-        this.orbitControls.enablePan = true;
+        this.orbitControls.enablePan = false;
+        this.orbitControls.maxPolarAngle = Math.PI / 2;
         this.render();
 
         const deltaTime = SETTINGS.GAME_MECHANICS_INTERVAL / 1000;
@@ -73,6 +89,7 @@ export default class Graphics3dManager {
     initGameMechanics = (deltaTime: number, intervenedTime: number) => {
 
         // this.moveCube(deltaTime, intervenedTime);
+        this.moveCamera(deltaTime);
     };
 
     /**
@@ -81,6 +98,49 @@ export default class Graphics3dManager {
     moveCube = (deltaTime: number, intervenedTime: number) => {
         this.cube.rotation.x += 0.6 * deltaTime;
         this.cube.position.x = Math.sin(intervenedTime / 1000) * 5;
+    };
+
+    /**
+     * Moves the camera according to {@link cameraXVelocity} and
+     * {@link cameraYVelocity}.
+     * @param deltaTime Time intervened since last invocation.
+     */
+    private moveCamera = (deltaTime: number) => {
+        let target = new Vector3(0, 0, 0);// useless vector needed by getWorldDirection
+
+        if (this.cameraXVelocity != 0) {
+            const cameraAngle = this.camera.rotation.z;
+            const deltaPosition =
+                SETTINGS.cameraVelocityToZPositionCoeffictient
+                * this.camera.position.z
+                * this.cameraXVelocity
+                * deltaTime;
+
+            const vector = new Vector3(
+                deltaPosition * Math.cos(cameraAngle),
+                deltaPosition * Math.sin(cameraAngle),
+                0
+            );
+            this.camera.position.add(vector);
+            this.orbitControls.target.add(vector);
+        }
+        if (this.cameraYVelocity != 0) {
+            const cameraAngle = this.camera.rotation.z;
+            const deltaPosition =
+                SETTINGS.cameraVelocityToZPositionCoeffictient
+                * this.camera.position.z
+                * this.cameraYVelocity
+                * deltaTime;
+
+            const vector = new Vector3(
+                -deltaPosition * Math.sin(cameraAngle),
+                deltaPosition * Math.cos(cameraAngle),
+                0
+            );
+            this.camera.position.add(vector);
+            this.orbitControls.target.add(vector);
+        }
+
     };
 
     /**
@@ -104,7 +164,6 @@ export default class Graphics3dManager {
             // mapFieldMesh.position.x = field.x;
             // mapFieldMesh.position.y = field.y;
             mapFieldMesh.position.set(field.x, field.y, 0);
-            console.log("mapFieldMesh.position.x: ", mapFieldMesh.position.x);
         }
 
         this.camera.position.set(
@@ -112,9 +171,7 @@ export default class Graphics3dManager {
             data.buildings[0].y,
             10
         );
-        this.orbitControls.target = new Vector3(data.buildings[0].x, data.buildings[0].y);
+        this.orbitControls.target = new Vector3(data.buildings[0].x, data.buildings[0].y, 1);
     };
-
-
 
 }
