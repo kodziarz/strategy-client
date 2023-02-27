@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import envSettings from '../../settings.json';
 
 interface userCredentials {
     username: string,
@@ -6,7 +7,7 @@ interface userCredentials {
 }
 
 export default class LoginController {
-    private url: string = 'http://localhost:3000/login';
+    private url: string = `http://${envSettings.serverAddress}/login`;
     private loginInput: HTMLInputElement;
     private passwordInput: HTMLInputElement;
 
@@ -30,7 +31,7 @@ export default class LoginController {
                 'content-type': 'application/json',
             },
             body: JSON.stringify(data)
-        };
+        };        
 
         let response = await fetch(this.url, options);
         if (!response.ok) console.log('nie udało się wykonać zapytania');
