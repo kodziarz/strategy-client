@@ -5,6 +5,11 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import MapField from "./dataClasses/MapField";
 import GrasslandMesh from "./meshes/GrasslandMesh";
 import { Vector3 } from "three";
+import Building from "./dataClasses/Building";
+import BuildingMesh from "./meshes/BuildingMesh";
+import BuildingsTypes from "./dataClasses/buildings/BuildingsTypes";
+import MainBuilding from "./dataClasses/buildings/MainBuilding";
+import MainBuildingMesh from "./meshes/MainBuildingMesh";
 /**
  * Manages displaying 3d map.
  */
@@ -143,18 +148,48 @@ export default class Graphics3dManager {
 
     };
 
-    /**
-     * Creates {@link MapFieldMesh | map fields} and sets camera position.
-     * @param data Map data from server.
-     */
-    createMap = (data: any) => {
 
+    /**
+    * Creates {@link MapFieldMesh | map fields} and sets camera position.
+    * @param data Map data from server.
+    */
+    private initiateFieldMeshes = (data: any) => {
         // initiation of this.fieldsMeshes
         this.fieldsMeshes = [];
         for (let x = 0; x < data.columns; x++) {
             this.fieldsMeshes[x] = [];
         }
 
+        this.camera.position.set(
+            data.buildings[0].x,
+            data.buildings[0].y,
+            10
+        );
+        this.orbitControls.target = new Vector3(data.buildings[0].x, data.buildings[0].y, 1);
+    }
+
+    /**
+     * Creates BuildingMesh of served Building type.
+     * @param building type of {@link Building}
+     * @returns new {@link BuildingMesh} 
+     */
+    private getDistinguishedBuildingMeshType = (building: Building) => {
+        switch (building.type) {
+            case BuildingsTypes.MAIN:
+                return new MainBuildingMesh(building);
+            default: throw new Error("Such MapField type as " + building.type + " does not exist.");
+        }
+    }
+
+    /**
+     * Renders map objects: {@link MapFieldMesh | map fields}, {@link Building | buildings} and {@link}.
+     * @param data Map data from server.
+     */
+    renderMap = (data: any) => {
+
+        if (!this.fieldsMeshes) this.initiateFieldMeshes(data);
+
+        // Renders ObservedMapFields
         for (let i = 0; i < data.observedMapFields.length; i++) {
             let field: MapField = data.observedMapFields[i];
             let mapFieldMesh = new GrasslandMesh(field);
@@ -166,12 +201,20 @@ export default class Graphics3dManager {
             mapFieldMesh.position.set(field.x, field.y, 0);
         }
 
-        this.camera.position.set(
-            data.buildings[0].x,
-            data.buildings[0].y,
-            10
-        );
-        this.orbitControls.target = new Vector3(data.buildings[0].x, data.buildings[0].y, 1);
+        // Renders Buildings
+        for (let i = 0; i < data.buildings.length; i++) {
+            let building: Building = data.buildings[i];
+            let buildingMesh = this.getDistinguishedBuildingMeshType(building);
+            this.scene.add(buildingMesh);
+            buildingMesh.position.set(building.x, building.y, 0);
+        }
+
+        /*
+        // Renders VisitedMapFields
+        for (let i = 0; i < data.visitedMapFields.length; i++) {
+            let visitedMapField: any = data.visitedMapFields[i];
+        }
+        */
     };
 
 }
