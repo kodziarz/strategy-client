@@ -31,7 +31,7 @@ export default class LoginController {
                 'content-type': 'application/json',
             },
             body: JSON.stringify(data)
-        };        
+        };
 
         let response = await fetch(this.url, options);
         if (!response.ok) console.log('nie udało się wykonać zapytania');
