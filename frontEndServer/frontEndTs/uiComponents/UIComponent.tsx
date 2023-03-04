@@ -47,7 +47,7 @@ export default class UIComponent extends React.Component {
 
     render(): React.ReactNode {
         return (
-            <div>
+            <div style={{ pointerEvents: "none", width: "100vw", height: "100vh" }}>
                 <ResourcesBar />
             </div>
         );
