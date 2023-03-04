@@ -84,6 +84,12 @@ export default class Graphics3dManager {
         this.orbitControls.update();
     };
 
+    resizeRenderer = () => {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
     /**
      * Powers game mechanics by regular invocation of given methods.
      * @remarks Invocaton interval can changed in SETTINGS.json
@@ -173,7 +179,7 @@ export default class Graphics3dManager {
      * @param building type of {@link Building}
      * @returns new {@link BuildingMesh} 
      */
-    private getDistinguishedBuildingMeshType = (building: Building) => {
+    private getDistinguishedTypeBuildingMesh = (building: Building) => {
         switch (building.type) {
             case BuildingsTypes.MAIN:
                 return new MainBuildingMesh(building);
@@ -204,7 +210,7 @@ export default class Graphics3dManager {
         // Renders Buildings
         for (let i = 0; i < data.buildings.length; i++) {
             let building: Building = data.buildings[i];
-            let buildingMesh = this.getDistinguishedBuildingMeshType(building);
+            let buildingMesh = this.getDistinguishedTypeBuildingMesh(building);
             this.scene.add(buildingMesh);
             buildingMesh.position.set(building.x, building.y, 0);
         }
