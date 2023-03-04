@@ -5,7 +5,7 @@ Plan dzialania (mocno wstępny xd):
 -/+ sposób przechowywania danych o budynkach na serwerze
 pewnie coś w stylu listy przechowyującej obiekty dziedziczące po jakimś
 obiekcie Building czy coś
-- przesuwanie kamery poprzez podjeżdżanie myszą do krawędzi ekranu
++ przesuwanie kamery poprzez podjeżdżanie myszą do krawędzi ekranu
 (pole target OrbitControlsów) - będzie walka z reactem xd
 - stawianie budynków na frontendzie (jakieś prowizoryczne kostki)
 - generowanie surowców na mapie (serwer) - na początku wystarczy jeden
