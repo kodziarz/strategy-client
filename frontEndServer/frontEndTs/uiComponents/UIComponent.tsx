@@ -55,7 +55,6 @@ export default class UIComponent extends React.Component {
 
     render(): React.ReactNode {
         return (
-<<<<<<< HEAD
             <div style={{ pointerEvents: "none", width: "100vw", height: "100vh" }}>
                 <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
                     <HorizontalToolboxOverlay onNewBuilding={this.onNewBuilding} />
@@ -63,10 +62,8 @@ export default class UIComponent extends React.Component {
                 <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
                     <VerticalToolboxOverlay />
                 </div>
-=======
-            <div style={{ pointerEvents: "none", width: "100vw", height: "100vh", display: "flex" }}>
+                <div style={{ pointerEvents: "none", width: "100vw", height: "100vh", display: "flex" }}>
                     <ResourcesBar />
->>>>>>> 9d18da6167845eb8a7cc954d78b0483d49cd6d5a
                 </div>
             </div>
         );
