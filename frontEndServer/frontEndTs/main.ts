@@ -22,8 +22,8 @@ class Main {
     // private graphics3dManager: Graphics3dManager;
 
     constructor(
-        private graphics3dManager: Graphics3dManager,
         private uiManager: UIManager,
+        private graphics3dManager: Graphics3dManager,
         private socketManager: SocketManager,
     ) {
         // this.graphics3dManager = new Graphics3dManager(document.getElementById("root3d") as HTMLDivElement);

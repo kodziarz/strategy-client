@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import SETTINGS from "./SETTINGS";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import MapField from "./dataClasses/MapField";
@@ -43,10 +43,6 @@ export default class Graphics3dManager {
     cameraYVelocity = 0;
 
     constructor() {
-        this.rootDiv = document.getElementById("root3d") as HTMLDivElement;
-
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.rootDiv.appendChild(this.renderer.domElement);
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -72,6 +68,20 @@ export default class Graphics3dManager {
         );
     }
 
+    setRootDiv = (domElement: HTMLDivElement) => {
+        this.rootDiv = domElement;
+        this.rootDiv.appendChild(this.renderer.domElement);
+        this.resizeRenderer();
+    };
+
+
+    /**Adjusts camera and renderer to new {@link rootDiv} dimensions. */
+    resizeRenderer = () => {
+        this.camera.aspect = this.rootDiv.clientWidth / this.rootDiv.clientHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.rootDiv.clientWidth, this.rootDiv.clientHeight);
+    };
+
     /**
      * Provides rendering of the scene.
      * @remarks This method should not be used to move objects, because the frequency
@@ -82,12 +92,6 @@ export default class Graphics3dManager {
         requestAnimationFrame(this.render);
         this.renderer.render(this.scene, this.camera);
         this.orbitControls.update();
-    };
-
-    resizeRenderer = () => {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
     /**
@@ -172,7 +176,7 @@ export default class Graphics3dManager {
             10
         );
         this.orbitControls.target = new Vector3(data.buildings[0].x, data.buildings[0].y, 1);
-    }
+    };
 
     /**
      * Creates BuildingMesh of served Building type.
@@ -185,7 +189,7 @@ export default class Graphics3dManager {
                 return new MainBuildingMesh(building);
             default: throw new Error("Such MapField type as " + building.type + " does not exist.");
         }
-    }
+    };
 
     /**
      * Renders map objects: {@link MapFieldMesh | map fields}, {@link Building | buildings} and {@link}.

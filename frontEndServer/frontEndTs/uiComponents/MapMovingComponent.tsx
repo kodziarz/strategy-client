@@ -22,24 +22,26 @@ export default class MapMovingComponent extends Component<MapMovingComponentProp
     handleMouseMove = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 
 
+        // console.log("this.ref.current.offsetWidth: ", this.ref.current.offsetWidth);
+
         switch (this.props.direction) {
             case "up":
-                const topBorder = this.ref.current.offsetTop;
+                const topBorder = this.ref.current.getBoundingClientRect().top;
                 const tDistance = this.ref.current.offsetHeight - (event.clientY - topBorder);
                 this.graphics3dManager.cameraYVelocity = tDistance / this.ref.current.offsetHeight;
                 break;
             case "left":
-                const leftBorder = this.ref.current.offsetLeft;
+                const leftBorder = this.ref.current.getBoundingClientRect().left;
                 const lDistance = -(this.ref.current.offsetWidth - (event.clientX - leftBorder));
                 this.graphics3dManager.cameraXVelocity = lDistance / this.ref.current.offsetWidth;
                 break;
             case "down":
-                const bottomBorder = this.ref.current.offsetTop + this.ref.current.offsetHeight;
+                const bottomBorder = this.ref.current.getBoundingClientRect().bottom;
                 const bDistance = -(this.ref.current.offsetHeight - (bottomBorder - event.clientY));
                 this.graphics3dManager.cameraYVelocity = bDistance / this.ref.current.offsetHeight;
                 break;
             case "right":
-                const rightBorder = this.ref.current.offsetLeft + this.ref.current.offsetWidth;
+                const rightBorder = this.ref.current.getBoundingClientRect().right;
                 const rDistance = this.ref.current.offsetWidth - (rightBorder - event.clientX);
                 this.graphics3dManager.cameraXVelocity = rDistance / this.ref.current.offsetWidth;
                 break;
@@ -60,9 +62,13 @@ export default class MapMovingComponent extends Component<MapMovingComponentProp
     };
 
     render() {
+        let style = Object.assign({
+            pointerEvents: "auto"
+        }, this.props.style);
+
         return (
             <div ref={this.ref}
-                style={this.props.style != undefined ? this.props.style : {}}
+                style={style}
                 onMouseMove={this.handleMouseMove}
                 onMouseOut={this.handleMouseOut}>
             </div>
