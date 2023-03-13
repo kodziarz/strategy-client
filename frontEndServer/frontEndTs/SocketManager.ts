@@ -8,6 +8,8 @@ import MapField from "./dataClasses/MapField";
 import FieldsTypes from "./dataClasses/mapFields/FieldsTypes";
 import Grassland from "./dataClasses/mapFields/Grassland";
 import Graphics3dManager from "./Graphics3dManager";
+import envSettings from '../../settings.json';
+
 
 /**
  * Provides methods for socket communication with server.
@@ -19,7 +21,7 @@ export default class SocketManager {
     constructor(
         private readonly graphics3dManager: Graphics3dManager
     ) {
-        this.socket = io("ws://localhost:3000", {
+        this.socket = io(`ws://${envSettings.serverAddress}`, {
             transportOptions: {
                 polling: {
                     extraHeaders: {
