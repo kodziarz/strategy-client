@@ -16,6 +16,9 @@ import MainBuildingMesh from "./meshes/MainBuildingMesh";
 @Service()
 export default class Graphics3dManager {
 
+    addRootDivEventListener: Function;
+    surface: THREE.Mesh;
+
     private rootDiv: HTMLDivElement;
     private scene = new THREE.Scene();
     private camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -72,6 +75,7 @@ export default class Graphics3dManager {
         this.rootDiv = domElement;
         this.rootDiv.appendChild(this.renderer.domElement);
         this.resizeRenderer();
+        this.addRootDivEventListener = this.rootDiv.addEventListener;
     };
 
 
@@ -225,6 +229,14 @@ export default class Graphics3dManager {
             let visitedMapField: any = data.visitedMapFields[i];
         }
         */
+
+        const geo = new THREE.PlaneGeometry(data.columns * SETTINGS.mapFieldSide, data.rows * SETTINGS.mapFieldSide);
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        this.surface = new THREE.Mesh(geo, material);
+        this.scene.add(this.surface);
+
     };
+
+
 
 }

@@ -56,7 +56,7 @@ export default class LoginController {
             }
         };
 
-        let response = await fetch("http://localhost:3000/joinGame", options);
+        let response = await fetch(`http://${envSettings.serverAddress}/joinGame`, options);
         let responseText = await response.text();
         return responseText;
     };
