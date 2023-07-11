@@ -4,7 +4,7 @@ import Graphics3dManager from "./Graphics3dManager";
 import UIManager from "./UIManager";
 
 /**
- * Intercedes between {@link UIManager} and {@link Graphics3dManager}.
+ * Intercedes between {@link UIManager} and inner, background classes (e.g. {@link Graphics3dManager}).
  */
 @Service()
 export default class UIInterface {
@@ -14,12 +14,16 @@ export default class UIInterface {
         private readonly uiManager: UIManager
     ) { }
 
+    setGraphics3dManagerRootDiv(domElement: HTMLDivElement) {
+        this.graphics3dManager.setRootDiv(domElement);
+    }
+
     /**
      * Lets user indicate the position of building on map.
      * @param building Data of building to build.
      */
     placeBuilding = async (building: Building): Promise<void> => {
-
+        console.log("place building")
     };
 
 }

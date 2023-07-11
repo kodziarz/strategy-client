@@ -2,10 +2,11 @@ import React from "react";
 import Container from "typedi";
 import Graphics3dManager from "../Graphics3dManager";
 import SETTINGS from "../SETTINGS";
-import HorizontalToolboxOverlay from "./HorizontalToolboxOverlay";
-import Overlay from "./Overlay";
 import ResourcesBar from "./ResourcesBar";
-import VerticalToolboxOverlay from "./VerticalToolboxOverlay";
+import NewBuildingButton from "./NewBuildingButton";
+import MapMovingComponent from "./MapMovingComponent";
+import UIInterface from "../UIInterface";
+import MainBuilding from "../dataClasses/buildings/MainBuilding";
 
 /**
  * Main UI Component.
@@ -13,13 +14,22 @@ import VerticalToolboxOverlay from "./VerticalToolboxOverlay";
 export default class UIComponent extends React.Component {
 
     private graphics3dManager: Graphics3dManager;
+    ThreeJSDivRef: React.RefObject<HTMLDivElement>;
+    private uiInterface: UIInterface;
 
     constructor(props: {}) {
         super(props);
         this.state = {};
+        this.ThreeJSDivRef = React.createRef();
         this.graphics3dManager = Container.get(Graphics3dManager);
+        this.uiInterface = Container.get(UIInterface);
 
         window.addEventListener('resize', this.graphics3dManager.resizeRenderer);
+    }
+
+    componentDidMount(): void {
+        this.graphics3dManager = Container.get(Graphics3dManager);
+        this.graphics3dManager.setRootDiv(this.ThreeJSDivRef.current);
     }
 
     // Reacts on NewBuildingButton click, sends event to Graphics3dManager
@@ -32,14 +42,49 @@ export default class UIComponent extends React.Component {
         return (
             <div style={{ pointerEvents: "none", width: "100vw", height: "100vh" }}>
                 <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
-                    <HorizontalToolboxOverlay onNewBuilding={this.onNewBuilding} />
+                    {/* <HorizontalToolboxOverlay onNewBuilding={this.onNewBuilding} /> */}
+                    <div style={{ display: "flex", flexDirection: "column", justifyContent: 'space-between', width: "100vw", height: "100vh" }}>
+                        <div style={{ display: "flex", backgroundColor: "yellow", flex: 1, justifyContent: 'center' }}>
+                            <ResourcesBar />
+                            <NewBuildingButton onNewBuilding={
+                                async () => {
+                                    await this.uiInterface.placeBuilding(new MainBuilding(0, 0));
+                                }} />
+                        </div>
+                        <div style={{ display: "flex", flex: 25, flexDirection: "row" }}>
+                            <div style={{ display: "flex", backgroundColor: "blue", flex: 1 }}>
+                                lewy pasek
+                            </div>
+                            <div style={{ display: "flex", flexGrow: 25, position: "relative" }}>
+                                <div ref={this.ThreeJSDivRef}
+                                    style={{ position: "absolute", width: "100%", height: "100%", pointerEvents: "auto" }}></div>
+
+                                <div
+                                    style={{
+                                        position: "absolute", width: "100%", height: "100%", pointerEvents: "none",
+                                        display: "flex", flexDirection: "row", justifyContent: "space-between"
+                                    }}>
+                                    <MapMovingComponent direction="left" style={{ width: "5%", backgroundColor: "gray" }} />
+                                    <MapMovingComponent direction="right" style={{ width: "5%", backgroundColor: "gray" }} />
+                                </div>
+                                <div
+                                    style={{
+                                        position: "absolute", width: "100%", height: "100%", pointerEvents: "none",
+                                        display: "flex", flexDirection: "column", justifyContent: "space-between"
+                                    }}>
+                                    <MapMovingComponent direction="up" style={{ height: "5%", backgroundColor: "gray" }} />
+                                    <MapMovingComponent direction="down" style={{ height: "5%", backgroundColor: "gray" }} />
+                                </div>
+                            </div>
+                            <div style={{ display: "flex", backgroundColor: "blue", flex: 1 }}>
+                                prawy pasek
+                            </div>
+                        </div>
+                        <div style={{ display: "flex", backgroundColor: "yellow", flex: 1 }}>
+                            dolny pasek
+                        </div>
+                    </div>
                 </div>
-                {/* <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
-                    <VerticalToolboxOverlay />
-                </div> */}
-                {/* <div style={{ pointerEvents: "none", width: "100vw", height: "100vh", display: "flex" }}>
-                    <ResourcesBar />
-                </div> */}
             </div>
         );
     }

@@ -11,17 +11,17 @@ export interface ButtonEvents {
 
 export default class HorizontalToolboxOverlay extends Component<ButtonEvents> {
 
-    graphics3dManagerDivRef: React.RefObject<HTMLDivElement>;
+    ThreeJSDivRef: React.RefObject<HTMLDivElement>;
     graphics3dManager: Graphics3dManager;
 
     constructor(props: ButtonEvents) {
         super(props);
-        this.graphics3dManagerDivRef = React.createRef();
+        this.ThreeJSDivRef = React.createRef();
     }
 
     componentDidMount(): void {
         this.graphics3dManager = Container.get(Graphics3dManager);
-        this.graphics3dManager.setRootDiv(this.graphics3dManagerDivRef.current);
+        this.graphics3dManager.setRootDiv(this.ThreeJSDivRef.current);
     }
 
     render() {
@@ -29,14 +29,18 @@ export default class HorizontalToolboxOverlay extends Component<ButtonEvents> {
             <div style={{ display: "flex", flexDirection: "column", justifyContent: 'space-between', width: "100vw", height: "100vh" }}>
                 <div style={{ display: "flex", backgroundColor: "yellow", flex: 1, justifyContent: 'center' }}>
                     <ResourcesBar />
-                    <NewBuildingButton onNewBuilding={() => this.props.onNewBuilding()} />
+                    <NewBuildingButton onNewBuilding={
+                        () => {
+                            this.props.onNewBuilding();
+
+                        }} />
                 </div>
                 <div style={{ display: "flex", flex: 25, flexDirection: "row" }}>
                     <div style={{ display: "flex", backgroundColor: "blue", flex: 1 }}>
-                        xd
+                        lewy pasek
                     </div>
                     <div style={{ display: "flex", flexGrow: 25, position: "relative" }}>
-                        <div ref={this.graphics3dManagerDivRef}
+                        <div ref={this.ThreeJSDivRef}
                             style={{ position: "absolute", width: "100%", height: "100%", pointerEvents: "auto" }}></div>
                         <div
                             style={{
@@ -56,11 +60,11 @@ export default class HorizontalToolboxOverlay extends Component<ButtonEvents> {
                         </div>
                     </div>
                     <div style={{ display: "flex", backgroundColor: "blue", flex: 1 }}>
-                        xd
+                        prawy pasek
                     </div>
                 </div>
                 <div style={{ display: "flex", backgroundColor: "yellow", flex: 1 }}>
-                    xd
+                    dolny pasek
                 </div>
             </div>
         );
