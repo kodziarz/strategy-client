@@ -7,11 +7,19 @@ import NewBuildingButton from "./NewBuildingButton";
 import MapMovingComponent from "./MapMovingComponent";
 import UIInterface from "../UIInterface";
 import MainBuilding from "../dataClasses/buildings/MainBuilding";
+import FunctionalOverlay from "./FunctionalOverlay";
+import SettingsButton from "./SettingsButton";
+
+
+interface UIComponentState {
+    isOverlayVisible: boolean,
+    overlayFunction: 'building' | 'resources' | 'settings' // 'settings' is default function
+}
 
 /**
  * Main UI Component.
  */
-export default class UIComponent extends React.Component {
+export default class UIComponent extends React.Component<{}, UIComponentState> {
 
     private graphics3dManager: Graphics3dManager;
     private threeJSDivRef: React.RefObject<HTMLDivElement>;
@@ -19,11 +27,10 @@ export default class UIComponent extends React.Component {
 
     constructor(props: {}) {
         super(props);
-        this.state = {};
+        this.state = { isOverlayVisible: false, overlayFunction: 'settings' };
         this.threeJSDivRef = React.createRef();
         this.graphics3dManager = Container.get(Graphics3dManager);
         this.uiInterface = Container.get(UIInterface);
-
         window.addEventListener('resize', this.graphics3dManager.resizeRenderer);
     }
 
@@ -34,8 +41,14 @@ export default class UIComponent extends React.Component {
     // Reacts on NewBuildingButton click, sends event to Graphics3dManager
     onNewBuilding = () => {
         // Sets Graphics3dManager 'state' on 'placing building'
+        this.setState({ isOverlayVisible: !this.state.isOverlayVisible, overlayFunction: 'building' });
+        console.log(this.state);
         console.log('place a building');
     };
+
+    onNewBuildingSelected = (buildingName: string) => {
+
+    }
 
     render(): React.ReactNode {
         return (
@@ -45,9 +58,15 @@ export default class UIComponent extends React.Component {
                     <div style={{ display: "flex", flexDirection: "column", justifyContent: 'space-between', width: "100vw", height: "100vh" }}>
                         <div style={{ display: "flex", backgroundColor: "yellow", flex: 1, justifyContent: 'center' }}>
                             <ResourcesBar />
+                            <SettingsButton onClick={
+                                async () => {
+                                    this.setState({ overlayFunction: 'settings', isOverlayVisible: !this.state.isOverlayVisible });
+                                }
+                            } />
                             <NewBuildingButton onNewBuilding={
                                 async () => {
                                     await this.uiInterface.placeBuilding(new MainBuilding(0, 0));
+                                    this.onNewBuilding();
                                 }} />
                         </div>
                         <div style={{ display: "flex", flex: 25, flexDirection: "row" }}>
@@ -56,7 +75,8 @@ export default class UIComponent extends React.Component {
                             </div>
                             <div style={{ display: "flex", flexGrow: 25, position: "relative" }}>
                                 <div ref={this.threeJSDivRef}
-                                    style={{ position: "absolute", width: "100%", height: "100%", pointerEvents: "auto" }}></div>
+                                    style={{ position: "absolute", width: "100%", height: "100%", pointerEvents: "auto" }}>
+                                </div>
 
                                 <div
                                     style={{
@@ -73,6 +93,9 @@ export default class UIComponent extends React.Component {
                                     }}>
                                     <MapMovingComponent direction="up" style={{ height: "5%", backgroundColor: "gray" }} />
                                     <MapMovingComponent direction="down" style={{ height: "5%", backgroundColor: "gray" }} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'row', position: 'absolute', width: '100%', height: '100%' }}>
+                                    <FunctionalOverlay function={this.state.overlayFunction} isVisible={this.state.isOverlayVisible} />
                                 </div>
                             </div>
                             <div style={{ display: "flex", backgroundColor: "blue", flex: 1 }}>
