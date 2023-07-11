@@ -14,13 +14,13 @@ import MainBuilding from "../dataClasses/buildings/MainBuilding";
 export default class UIComponent extends React.Component {
 
     private graphics3dManager: Graphics3dManager;
-    ThreeJSDivRef: React.RefObject<HTMLDivElement>;
+    private threeJSDivRef: React.RefObject<HTMLDivElement>;
     private uiInterface: UIInterface;
 
     constructor(props: {}) {
         super(props);
         this.state = {};
-        this.ThreeJSDivRef = React.createRef();
+        this.threeJSDivRef = React.createRef();
         this.graphics3dManager = Container.get(Graphics3dManager);
         this.uiInterface = Container.get(UIInterface);
 
@@ -28,8 +28,7 @@ export default class UIComponent extends React.Component {
     }
 
     componentDidMount(): void {
-        this.graphics3dManager = Container.get(Graphics3dManager);
-        this.graphics3dManager.setRootDiv(this.ThreeJSDivRef.current);
+        this.uiInterface.setGraphics3dManagerRootDiv(this.threeJSDivRef.current);
     }
 
     // Reacts on NewBuildingButton click, sends event to Graphics3dManager
@@ -56,7 +55,7 @@ export default class UIComponent extends React.Component {
                                 lewy pasek
                             </div>
                             <div style={{ display: "flex", flexGrow: 25, position: "relative" }}>
-                                <div ref={this.ThreeJSDivRef}
+                                <div ref={this.threeJSDivRef}
                                     style={{ position: "absolute", width: "100%", height: "100%", pointerEvents: "auto" }}></div>
 
                                 <div

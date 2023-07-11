@@ -1,4 +1,4 @@
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import Building from "./dataClasses/Building";
 import Graphics3dManager from "./Graphics3dManager";
 import UIManager from "./UIManager";
@@ -9,10 +9,16 @@ import UIManager from "./UIManager";
 @Service()
 export default class UIInterface {
 
+    private readonly graphics3dManager: Graphics3dManager;
+    private readonly uiManager: UIManager;
+
     constructor(
-        private readonly graphics3dManager: Graphics3dManager,
-        private readonly uiManager: UIManager
-    ) { }
+        // private readonly graphics3dManager: Graphics3dManager,
+        // private readonly uiManager: UIManager
+    ) {
+        this.graphics3dManager = Container.get(Graphics3dManager);
+        this.uiManager = Container.get(UIManager);
+    }
 
     setGraphics3dManagerRootDiv(domElement: HTMLDivElement) {
         this.graphics3dManager.setRootDiv(domElement);
