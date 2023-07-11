@@ -17,6 +17,14 @@ export default class LoginController {
 
         const loginButton = document.getElementById('loginButton') as HTMLInputElement;
         loginButton.onclick = this.onLogin;
+
+        this.loginInput.focus();
+
+        window.addEventListener("keydown", (ev) => {
+            if (ev.key == "Enter") {
+                this.onLogin()
+            }
+        })
     }
 
     onLogin = async () => {

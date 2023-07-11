@@ -58,6 +58,8 @@ export default class Graphics3dManager {
         this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
         this.orbitControls.enableZoom = true;
         this.orbitControls.enablePan = false;
+        this.orbitControls.minDistance = this.camera.near * 0.95;
+        this.orbitControls.maxDistance = this.camera.far * 0.95;
         this.orbitControls.maxPolarAngle = Math.PI / 2;
         this.render();
 
@@ -230,9 +232,14 @@ export default class Graphics3dManager {
         }
         */
 
+        // plane to get indicated point on a map
+
         const geo = new THREE.PlaneGeometry(data.columns * SETTINGS.mapFieldSide, data.rows * SETTINGS.mapFieldSide);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
         this.surface = new THREE.Mesh(geo, material);
+        this.surface.position.x = (data.columns / 2) * SETTINGS.mapFieldSide
+        this.surface.position.y = (data.rows / 2) * SETTINGS.mapFieldSide
+        this.surface.position.z = -1
         this.scene.add(this.surface);
 
     };
