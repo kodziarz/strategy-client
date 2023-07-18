@@ -13,7 +13,6 @@ import MainBuilding from "../dataClasses/buildings/MainBuilding";
  */
 export default class UIComponent extends React.Component {
 
-    private graphics3dManager: Graphics3dManager;
     private threeJSDivRef: React.RefObject<HTMLDivElement>;
     private uiInterface: UIInterface;
 
@@ -21,10 +20,7 @@ export default class UIComponent extends React.Component {
         super(props);
         this.state = {};
         this.threeJSDivRef = React.createRef();
-        this.graphics3dManager = Container.get(Graphics3dManager);
         this.uiInterface = Container.get(UIInterface);
-
-        window.addEventListener('resize', this.graphics3dManager.resizeRenderer);
     }
 
     componentDidMount(): void {
@@ -41,13 +37,14 @@ export default class UIComponent extends React.Component {
         return (
             <div style={{ pointerEvents: "none", width: "100vw", height: "100vh" }}>
                 <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
-                    {/* <HorizontalToolboxOverlay onNewBuilding={this.onNewBuilding} /> */}
                     <div style={{ display: "flex", flexDirection: "column", justifyContent: 'space-between', width: "100vw", height: "100vh" }}>
                         <div style={{ display: "flex", backgroundColor: "yellow", flex: 1, justifyContent: 'center' }}>
                             <ResourcesBar />
                             <NewBuildingButton onNewBuilding={
                                 async () => {
-                                    await this.uiInterface.placeBuilding(new MainBuilding(0, 0));
+                                    let mesh = await this.uiInterface.placeBuilding(new MainBuilding(0, 0));
+                                    console.log("Właśnie postawiono budynek: ", mesh);
+
                                 }} />
                         </div>
                         <div style={{ display: "flex", flex: 25, flexDirection: "row" }}>

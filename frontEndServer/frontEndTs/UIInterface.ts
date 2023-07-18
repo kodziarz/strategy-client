@@ -2,6 +2,8 @@ import Container, { Service } from "typedi";
 import Building from "./dataClasses/Building";
 import Graphics3dManager from "./Graphics3dManager";
 import UIManager from "./UIManager";
+import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
+import BuildingMesh from "./meshes/BuildingMesh";
 
 /**
  * Intercedes between {@link UIManager} and inner, background classes (e.g. {@link Graphics3dManager}).
@@ -9,16 +11,10 @@ import UIManager from "./UIManager";
 @Service()
 export default class UIInterface {
 
-    private readonly graphics3dManager: Graphics3dManager;
-    private readonly uiManager: UIManager;
-
     constructor(
-        // private readonly graphics3dManager: Graphics3dManager,
-        // private readonly uiManager: UIManager
-    ) {
-        this.graphics3dManager = Container.get(Graphics3dManager);
-        this.uiManager = Container.get(UIManager);
-    }
+        private readonly buildingPlaceIndicator: BuildingPlaceIndicator,
+        private readonly graphics3dManager: Graphics3dManager
+    ) { }
 
     setGraphics3dManagerRootDiv(domElement: HTMLDivElement) {
         this.graphics3dManager.setRootDiv(domElement);
@@ -28,8 +24,8 @@ export default class UIInterface {
      * Lets user indicate the position of building on map.
      * @param building Data of building to build.
      */
-    placeBuilding = async (building: Building): Promise<void> => {
-        console.log("place building")
+    placeBuilding = async (building: Building): Promise<BuildingMesh> => {
+        return await this.buildingPlaceIndicator.placeBuilding(building);
     };
 
 }

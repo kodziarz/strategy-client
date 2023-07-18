@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Container, { Service } from "typedi";
+import Container, { Inject, Service } from "typedi";
 import SETTINGS from "./SETTINGS";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import MapField from "./dataClasses/MapField";
@@ -10,18 +10,21 @@ import BuildingMesh from "./meshes/BuildingMesh";
 import BuildingsTypes from "./dataClasses/buildings/BuildingsTypes";
 import MainBuilding from "./dataClasses/buildings/MainBuilding";
 import MainBuildingMesh from "./meshes/MainBuildingMesh";
+import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
+import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
 /**
  * Manages displaying 3d map.
  */
 @Service()
 export default class Graphics3dManager {
 
-    addRootDivEventListener: Function;
+    addRootDivEventListener: any;
+    removeRootDivEventListener: any;
     surface: THREE.Mesh;
 
     private rootDiv: HTMLDivElement;
-    private scene = new THREE.Scene();
-    private camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     private renderer = new THREE.WebGLRenderer();
 
     private cube: THREE.Mesh = null;
@@ -45,7 +48,11 @@ export default class Graphics3dManager {
      */
     cameraYVelocity = 0;
 
-    constructor() {
+    constructor(
+        private meshes3dCreator: Meshes3dCreator,
+        private buildingPlaceIndicator: BuildingPlaceIndicator
+    ) {
+        buildingPlaceIndicator.setGraphics3dManager(this);
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -77,7 +84,9 @@ export default class Graphics3dManager {
         this.rootDiv = domElement;
         this.rootDiv.appendChild(this.renderer.domElement);
         this.resizeRenderer();
-        this.addRootDivEventListener = this.rootDiv.addEventListener;
+        this.addRootDivEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => (this.rootDiv.addEventListener(type, listener, options));
+        this.removeRootDivEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void => (this.rootDiv.removeEventListener(type, listener, options));
+        window.addEventListener('resize', this.resizeRenderer);
     };
 
 
@@ -185,19 +194,6 @@ export default class Graphics3dManager {
     };
 
     /**
-     * Creates BuildingMesh of served Building type.
-     * @param building type of {@link Building}
-     * @returns new {@link BuildingMesh} 
-     */
-    private getDistinguishedTypeBuildingMesh = (building: Building) => {
-        switch (building.type) {
-            case BuildingsTypes.MAIN:
-                return new MainBuildingMesh(building);
-            default: throw new Error("Such MapField type as " + building.type + " does not exist.");
-        }
-    };
-
-    /**
      * Renders map objects: {@link MapFieldMesh | map fields}, {@link Building | buildings} and {@link}.
      * @param data Map data from server.
      */
@@ -220,7 +216,7 @@ export default class Graphics3dManager {
         // Renders Buildings
         for (let i = 0; i < data.buildings.length; i++) {
             let building: Building = data.buildings[i];
-            let buildingMesh = this.getDistinguishedTypeBuildingMesh(building);
+            let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
             this.scene.add(buildingMesh);
             buildingMesh.position.set(building.x, building.y, 0);
         }
@@ -237,9 +233,9 @@ export default class Graphics3dManager {
         const geo = new THREE.PlaneGeometry(data.columns * SETTINGS.mapFieldSide, data.rows * SETTINGS.mapFieldSide);
         const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
         this.surface = new THREE.Mesh(geo, material);
-        this.surface.position.x = (data.columns / 2) * SETTINGS.mapFieldSide
-        this.surface.position.y = (data.rows / 2) * SETTINGS.mapFieldSide
-        this.surface.position.z = -1
+        this.surface.position.x = (data.columns / 2) * SETTINGS.mapFieldSide;
+        this.surface.position.y = (data.rows / 2) * SETTINGS.mapFieldSide;
+        this.surface.position.z = -1;
         this.scene.add(this.surface);
 
     };
