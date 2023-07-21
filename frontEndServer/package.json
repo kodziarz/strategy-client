@@ -23,11 +23,13 @@
     "webpack-cli": "^5.0.1"
   },
   "scripts": {
-    "install": "npm install express npm install webpack webpack-cli --save-dev npm install typescript npm install three npm install --save @types/three npm install typedi reflect-metadata npm install --save react npm install --save react-dom npm install --save typescript @types/node @types/react @types/react-dom @types/jest npm install socket.io-client npm install js-cookie npm i @types/js-cookie",
+    "install": "npm install express npm install webpack webpack-cli --save-dev npm install typescript npm install three npm install --save @types/three npm install typedi reflect-metadata npm install --save react npm install --save react-dom npm install --save typescript @types/node @types/react @types/react-dom @types/jest npm install socket.io-client npm install js-cookie npm i @types/js-cookie npm install uuid npm install --save @types/uuid",
     "dev": "webpack --mode development",
     "prod": "webpack --mode production"
   },
   "dependencies": {
-    "three-orbitcontrols-ts": "^0.1.2"
+    "@types/uuid": "^9.0.2",
+    "three-orbitcontrols-ts": "^0.1.2",
+    "uuid": "^9.0.0"
   }
 }

@@ -62,8 +62,6 @@ export default class UIComponent extends React.Component<{}, UIComponentState> {
                             <NewBuildingButton onNewBuilding={
                                 async () => {
                                     let mesh = await this.uiInterface.placeBuilding(new MainBuilding(0, 0));
-                                    console.log("Właśnie postawiono budynek: ", mesh);
-
                                 }} />
                         </div>
                         <div style={{ display: "flex", flex: 25, flexDirection: "row" }}>

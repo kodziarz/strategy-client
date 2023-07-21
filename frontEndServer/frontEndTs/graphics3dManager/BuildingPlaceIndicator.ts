@@ -27,14 +27,21 @@ export default class BuildingPlaceIndicator {
 
     placeBuilding = async (building: Building): Promise<BuildingMesh> => {
         return new Promise((resolve, reject) => {
-            this.resolve = resolve;
-            this.reject = reject;
-            this.currentBuildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
-            this.graphics3dManager.scene.add(this.currentBuildingMesh);
-            this.currentBuildingMesh.position.set(0, 0, 0);
-            // console.log("this.graphics3dManager: ", this.graphics3dManager);
-            this.graphics3dManager.addRootDivEventListener("mousemove", this.handleMouseMove);
-            this.graphics3dManager.addRootDivEventListener("mouseup", this.handleMouseUp);
+            if (this.currentBuildingMesh == null) {
+                this.resolve = resolve;
+                this.reject = reject;
+                this.currentBuildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
+                this.currentBuildingMesh.setTemporaryMode();
+                this.graphics3dManager.scene.add(this.currentBuildingMesh);
+                this.currentBuildingMesh.position.set(0, 0, 0);
+                console.log("current building mesh: ", this.currentBuildingMesh);
+
+                // console.log("this.graphics3dManager: ", this.graphics3dManager);
+                this.graphics3dManager.addRootDivEventListener("mousemove", this.handleMouseMove);
+                this.graphics3dManager.addRootDivEventListener("mouseup", this.handleMouseUp);
+            } else {
+                reject("nie postawiono budynku, który jest obecnie modyfikowany.");
+            }
         });
     };
 
@@ -57,22 +64,30 @@ export default class BuildingPlaceIndicator {
                 intersectionPoint.y,
                 intersectionPoint.z
             );
+            this.currentBuildingMesh.buildingData.x = intersectionPoint.x;
+            this.currentBuildingMesh.buildingData.y = intersectionPoint.y;
         }
 
     };
 
+    /**
+     * Clears {@link BuildingPlaceIndicator} and prepares it free {@link placeBuilding}.
+     */
+    clear() {
+        this.graphics3dManager.scene.remove(this.currentBuildingMesh);
+        this.currentBuildingMesh = null;
+    }
+
     handleMouseUp = () => {
-        let mesh = this.currentBuildingMesh;
         let resolveFunction = this.resolve;
 
-        this.currentBuildingMesh = null;
         this.reject = null;
         this.resolve = null;
 
         this.graphics3dManager.removeRootDivEventListener("mousemove", this.handleMouseMove);
         this.graphics3dManager.removeRootDivEventListener("mouseup", this.handleMouseUp);
 
-        resolveFunction(mesh);
+        resolveFunction(this.currentBuildingMesh);
     };
 
     setGraphics3dManager = (graphics3dManager: Graphics3dManager) => {

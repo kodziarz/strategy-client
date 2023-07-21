@@ -4,6 +4,7 @@ import Graphics3dManager from "./Graphics3dManager";
 import UIManager from "./UIManager";
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import BuildingMesh from "./meshes/BuildingMesh";
+import SocketManager from "./SocketManager";
 
 /**
  * Intercedes between {@link UIManager} and inner, background classes (e.g. {@link Graphics3dManager}).
@@ -13,7 +14,8 @@ export default class UIInterface {
 
     constructor(
         private readonly buildingPlaceIndicator: BuildingPlaceIndicator,
-        private readonly graphics3dManager: Graphics3dManager
+        private readonly graphics3dManager: Graphics3dManager,
+        private readonly socketManager: SocketManager
     ) { }
 
     setGraphics3dManagerRootDiv(domElement: HTMLDivElement) {
@@ -25,7 +27,10 @@ export default class UIInterface {
      * @param building Data of building to build.
      */
     placeBuilding = async (building: Building): Promise<BuildingMesh> => {
-        return await this.buildingPlaceIndicator.placeBuilding(building);
+        let mesh = await this.buildingPlaceIndicator.placeBuilding(building);
+        console.log("Właśnie postawiono budynek: ", mesh);
+        this.socketManager.placeBuilding(mesh.buildingData);
+        return mesh;
     };
 
 }

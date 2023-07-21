@@ -4,7 +4,7 @@ import MainBuilding from "../dataClasses/buildings/MainBuilding";
 import BuildingMesh from "./BuildingMesh";
 export default class MainBuildingMesh extends BuildingMesh {
 
-    mainBuildingData: MainBuilding;
+    // mainBuildingData: MainBuilding;
     constructor(mainBuilding: MainBuilding) {
         const geometry = new THREE.BoxGeometry(
             10, 10, 10
@@ -13,8 +13,8 @@ export default class MainBuildingMesh extends BuildingMesh {
             // 1
         );
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        super(geometry, material);
+        super(geometry, material, mainBuilding);
 
-        this.mainBuildingData = mainBuilding;
+        // this.mainBuildingData = mainBuilding;
     }
 }
