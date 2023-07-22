@@ -1,7 +1,7 @@
 import { Service } from "typedi";
-import BuildingsTypes from "../dataClasses/buildings/BuildingsTypes";
+import BuildingsTypes from "./../../../../strategy-common/dataClasses/buildings/BuildingsTypes";
 import MainBuildingMesh from "../meshes/MainBuildingMesh";
-import Building from "../dataClasses/Building";
+import Building from "./../../../../strategy-common/dataClasses/Building";
 
 /**
  * Retrieves 3d Meshes of given data classes.

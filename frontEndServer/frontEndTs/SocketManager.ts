@@ -1,12 +1,12 @@
 import Cookies from "js-cookie";
 import { io, Socket } from "socket.io-client";
 import { Service } from "typedi";
-import Building from "./dataClasses/Building";
-import BuildingsTypes from "./dataClasses/buildings/BuildingsTypes";
-import MainBuilding from "./dataClasses/buildings/MainBuilding";
-import MapField from "./dataClasses/MapField";
-import FieldsTypes from "./dataClasses/mapFields/FieldsTypes";
-import Grassland from "./dataClasses/mapFields/Grassland";
+import Building from "./../../../strategy-common/dataClasses/Building";
+import BuildingsTypes from "./../../../strategy-common/dataClasses/buildings/BuildingsTypes";
+import MainBuilding from "./../../../strategy-common/dataClasses/buildings/MainBuilding";
+import MapField from "./../../../strategy-common/dataClasses/MapField";
+import FieldsTypes from "./../../../strategy-common/dataClasses/mapFields/FieldsTypes";
+import Grassland from "./../../../strategy-common/dataClasses/mapFields/Grassland";
 import Graphics3dManager from "./Graphics3dManager";
 import envSettings from '../../settings.json';
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";

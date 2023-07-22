@@ -1,5 +1,5 @@
 import Container, { Service } from "typedi";
-import Building from "./dataClasses/Building";
+import Building from "./../../../strategy-common/dataClasses/Building";
 import Graphics3dManager from "./Graphics3dManager";
 import UIManager from "./UIManager";
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";

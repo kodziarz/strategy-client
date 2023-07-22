@@ -2,14 +2,10 @@ import * as THREE from "three";
 import Container, { Inject, Service } from "typedi";
 import SETTINGS from "./SETTINGS";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import MapField from "./dataClasses/MapField";
+import MapField from "./../../../strategy-common//dataClasses/MapField";
 import GrasslandMesh from "./meshes/GrasslandMesh";
 import { Vector3 } from "three";
-import Building from "./dataClasses/Building";
-import BuildingMesh from "./meshes/BuildingMesh";
-import BuildingsTypes from "./dataClasses/buildings/BuildingsTypes";
-import MainBuilding from "./dataClasses/buildings/MainBuilding";
-import MainBuildingMesh from "./meshes/MainBuildingMesh";
+import Building from "./../../../strategy-common/dataClasses/Building";
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
 /**

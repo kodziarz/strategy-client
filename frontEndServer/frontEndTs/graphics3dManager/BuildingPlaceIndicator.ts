@@ -1,5 +1,5 @@
 import Container, { Inject, Service } from "typedi";
-import Building from "../dataClasses/Building";
+import Building from "../../../../strategy-common/dataClasses/Building";
 import Graphics3dManager from "../Graphics3dManager";
 import { Raycaster, Vector2 } from "three";
 import Meshes3dCreator from "./Meshes3dCreator";

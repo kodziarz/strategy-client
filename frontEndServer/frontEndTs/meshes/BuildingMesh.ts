@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BufferGeometry, Material } from "three";
-import Building from "../dataClasses/Building";
+import Building from "./../../../../strategy-common/dataClasses/Building";
 export default class BuildingMesh extends THREE.Mesh {
     buildingData: Building;
     constructor(geometry: BufferGeometry, material: Material, building: Building) {

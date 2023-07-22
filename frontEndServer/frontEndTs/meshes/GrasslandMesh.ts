@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import MapField from "../dataClasses/MapField";
+import MapField from "./../../../../strategy-common/dataClasses/MapField";
 import SETTINGS from "../SETTINGS";
 import MapFieldMesh from "./MapFieldMesh";
 export default class GrasslandMesh extends MapFieldMesh {

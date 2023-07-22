@@ -6,7 +6,7 @@ import ResourcesBar from "./ResourcesBar";
 import NewBuildingButton from "./NewBuildingButton";
 import MapMovingComponent from "./MapMovingComponent";
 import UIInterface from "../UIInterface";
-import MainBuilding from "../dataClasses/buildings/MainBuilding";
+import MainBuilding from "./../../../../strategy-common/dataClasses/buildings/MainBuilding";
 import FunctionalOverlay from "./FunctionalOverlay";
 import SettingsButton from "./SettingsButton";
 
