@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Container, { Inject, Service } from "typedi";
+import { Service } from "typedi";
 import SETTINGS from "./SETTINGS";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import MapField from "./../../../strategy-common//dataClasses/MapField";
@@ -198,24 +198,23 @@ export default class Graphics3dManager {
         if (!this.fieldsMeshes) this.initiateFieldMeshes(data);
 
         // Renders ObservedMapFields
-        for (let i = 0; i < data.observedMapFields.length; i++) {
-            let field: MapField = data.observedMapFields[i];
-            let mapFieldMesh = new GrasslandMesh(field);
-            this.fieldsMeshes[field.column][field.row] = mapFieldMesh;
-            this.scene.add(mapFieldMesh);
-
-            // mapFieldMesh.position.x = field.x;
-            // mapFieldMesh.position.y = field.y;
-            mapFieldMesh.position.set(field.x, field.y, 0);
-        }
+        if (data.observedMapFields)
+            for (let i = 0; i < data.observedMapFields.length; i++) {
+                let field: MapField = data.observedMapFields[i];
+                let mapFieldMesh = new GrasslandMesh(field);
+                this.fieldsMeshes[field.column][field.row] = mapFieldMesh;
+                this.scene.add(mapFieldMesh);
+                mapFieldMesh.position.set(field.x, field.y, 0);
+            }
 
         // Renders Buildings
-        for (let i = 0; i < data.buildings.length; i++) {
-            let building: Building = data.buildings[i];
-            let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
-            this.scene.add(buildingMesh);
-            buildingMesh.position.set(building.x, building.y, 0);
-        }
+        if (data.buildings)
+            for (let i = 0; i < data.buildings.length; i++) {
+                let building: Building = data.buildings[i];
+                let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
+                this.scene.add(buildingMesh);
+                buildingMesh.position.set(building.x, building.y, 0);
+            }
 
         /*
         // Renders VisitedMapFields
@@ -225,15 +224,15 @@ export default class Graphics3dManager {
         */
 
         // plane to get indicated point on a map
-
-        const geo = new THREE.PlaneGeometry(data.columns * SETTINGS.mapFieldSide, data.rows * SETTINGS.mapFieldSide);
-        const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-        this.surface = new THREE.Mesh(geo, material);
-        this.surface.position.x = (data.columns / 2) * SETTINGS.mapFieldSide;
-        this.surface.position.y = (data.rows / 2) * SETTINGS.mapFieldSide;
-        this.surface.position.z = -1;
-        this.scene.add(this.surface);
-
+        if (!this.surface) { // otherwise throws exceptions, since not every map event has columns and rows fields and they're not saved anywhere yet TODO
+            const geo = new THREE.PlaneGeometry(data.columns * SETTINGS.mapFieldSide, data.rows * SETTINGS.mapFieldSide);
+            const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+            this.surface = new THREE.Mesh(geo, material);
+            this.surface.position.x = (data.columns / 2) * SETTINGS.mapFieldSide;
+            this.surface.position.y = (data.rows / 2) * SETTINGS.mapFieldSide;
+            this.surface.position.z = -1;
+            this.scene.add(this.surface);
+        }
     };
 
 

@@ -46,13 +46,15 @@ export default class SocketManager {
 
         this.socket.on("map", (data) => {
             console.log("odebrano wydarzenie map: ", data);
-            data.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
-                return instantiateMapField(mapFieldData);
-            });
+            if (data.observedMapFields)
+                data.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
+                    return instantiateMapField(mapFieldData);
+                });
 
-            data.buildings = data.buildings.map((building: Building) => {
-                return instantiateBuilding(building);
-            });
+            if (data.buildings)
+                data.buildings = data.buildings.map((building: Building) => {
+                    return instantiateBuilding(building);
+                });
 
             this.graphics3dManager.renderMap(data);
         });
@@ -73,40 +75,4 @@ export default class SocketManager {
     placeBuilding = (building: Building) => {
         this.socket.emit("building", building);
     };
-
-    // /**
-    //  * Converts raw {@link MapField | MapField's} data to instance of specific
-    //  * {@link MapField}.
-    //  * @param mapFieldData Converted {@link MapField | MapField's} data.
-    //  * @returns Specific subclass of {@link MapField}.
-    //  */
-    // private instantiateMapField(mapFieldData: MapField): MapField {
-    //     switch (mapFieldData.type) {
-    //         case FieldsTypes.GRASSLAND:
-    //             return Object.assign(new Grassland(-1, -1), mapFieldData);
-    //             break;
-    //         default: throw new Error("Such MapField type as " + mapFieldData.type + " does not exist.");
-    //     }
-    // }
-
-    // /**
-    //  * Converts raw {@link Building | Building's} data to instance of specific
-    //  * {@link Building}.
-    //  * @param building Converted {@link Building | Building's} data.
-    //  * @returns Specific subclass of {@link Building}.
-    //  */
-    // private instantiateBuilding(building: Building): Building {
-    //     switch (building.type) {
-    //         case BuildingsTypes.MAIN:
-    //             return Object.assign(new MainBuilding(-1, -1), building);
-    //             break;
-    //         // Rest of types of Building to write here
-    //         /*
-    //         case BuildingsTypes.MINE:
-    //             return Object.assign(new Mine(-1, -1), building);
-    //             break;
-    //         */
-    //         default: throw new Error("Such Building type as " + building.type + " does not exist.");
-    //     }
-    // }
 }
