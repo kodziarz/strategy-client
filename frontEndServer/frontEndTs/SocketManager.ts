@@ -1,13 +1,13 @@
 import Cookies from "js-cookie";
 import { io, Socket } from "socket.io-client";
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import Building from "./../../../strategy-common/dataClasses/Building";
 import Graphics3dManager from "./Graphics3dManager";
 import envSettings from '../../settings.json';
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
 import { instantiateBuilding, instantiateMapField } from "./../../../strategy-common/classInstantiatingService";
-
+import Player from "./../../../strategy-common/dataClasses/Player";
 
 /**
  * Provides methods for socket communication with server.
@@ -15,11 +15,12 @@ import { instantiateBuilding, instantiateMapField } from "./../../../strategy-co
 @Service()
 export default class SocketManager {
     private readonly socket: Socket;
+    private player: Player;
 
     constructor(
         private readonly graphics3dManager: Graphics3dManager,
         private readonly buildingPlaceIndicator: BuildingPlaceIndicator,
-        private readonly meshes3dCreator: Meshes3dCreator
+        private readonly meshes3dCreator: Meshes3dCreator,
     ) {
         this.socket = io(`ws://${envSettings.serverAddress}`, {
             transportOptions: {
@@ -31,6 +32,7 @@ export default class SocketManager {
             }
         });
         this.setEventListeners();
+        this.player = Container.get(Player);
     }
 
     /**
@@ -44,19 +46,28 @@ export default class SocketManager {
             this.socket.emit("map");
         });
 
-        this.socket.on("map", (data) => {
+        this.socket.on("map", (data: Player) => {
             console.log("odebrano wydarzenie map: ", data);
+            let tmp: any = {};
             if (data.observedMapFields)
-                data.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
+                tmp.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
                     return instantiateMapField(mapFieldData);
                 });
 
             if (data.buildings)
-                data.buildings = data.buildings.map((building: Building) => {
+                tmp.buildings = data.buildings.map((building: Building) => {
                     return instantiateBuilding(building);
                 });
 
-            this.graphics3dManager.renderMap(data);
+            Object.assign(data, tmp);
+            Object.assign(this.player, Object.fromEntries(Object.entries(data).filter(
+                ([key, value]) => {
+                    return (value == true || value == false) ? true : value;
+                    // if value is boolean, leace it in object, otherwise throw it out
+                    //if it is falsy (null, undefined etc)
+                })));
+
+            this.graphics3dManager.renderMap();
         });
 
         this.socket.on("buildingPlaced", (data) => {

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import SETTINGS from "./SETTINGS";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import MapField from "./../../../strategy-common//dataClasses/MapField";
@@ -8,6 +8,7 @@ import { Vector3 } from "three";
 import Building from "./../../../strategy-common/dataClasses/Building";
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
+import Player from "../../../strategy-common/dataClasses/Player";
 /**
  * Manages displaying 3d map.
  */
@@ -44,10 +45,13 @@ export default class Graphics3dManager {
      */
     cameraYVelocity = 0;
 
+    private player: Player;
+
     constructor(
         private meshes3dCreator: Meshes3dCreator,
-        private buildingPlaceIndicator: BuildingPlaceIndicator
+        private buildingPlaceIndicator: BuildingPlaceIndicator,
     ) {
+        this.player = Container.get(Player);
         buildingPlaceIndicator.setGraphics3dManager(this);
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -174,33 +178,37 @@ export default class Graphics3dManager {
     * Creates {@link MapFieldMesh | map fields} and sets camera position.
     * @param data Map data from server.
     */
-    private initiateFieldMeshes = (data: any) => {
+    private initiateFieldMeshes = () => {
         // initiation of this.fieldsMeshes
         this.fieldsMeshes = [];
-        for (let x = 0; x < data.columns; x++) {
+        for (let x = 0; x < this.player.columns; x++) {
             this.fieldsMeshes[x] = [];
         }
 
         this.camera.position.set(
-            data.buildings[0].x,
-            data.buildings[0].y,
+            this.player.buildings[0].x,
+            this.player.buildings[0].y,
             10
         );
-        this.orbitControls.target = new Vector3(data.buildings[0].x, data.buildings[0].y, 1);
+        this.orbitControls.target = new Vector3(
+            this.player.buildings[0].x,
+            this.player.buildings[0].y,
+            1
+        );
     };
 
     /**
      * Renders map objects: {@link MapFieldMesh | map fields}, {@link Building | buildings} and {@link}.
      * @param data Map data from server.
      */
-    renderMap = (data: any) => {
+    renderMap = () => {
 
-        if (!this.fieldsMeshes) this.initiateFieldMeshes(data);
+        if (!this.fieldsMeshes) this.initiateFieldMeshes();
 
         // Renders ObservedMapFields
-        if (data.observedMapFields)
-            for (let i = 0; i < data.observedMapFields.length; i++) {
-                let field: MapField = data.observedMapFields[i];
+        if (this.player.observedMapFields)
+            for (let i = 0; i < this.player.observedMapFields.length; i++) {
+                let field: MapField = this.player.observedMapFields[i];
                 let mapFieldMesh = new GrasslandMesh(field);
                 this.fieldsMeshes[field.column][field.row] = mapFieldMesh;
                 this.scene.add(mapFieldMesh);
@@ -208,9 +216,9 @@ export default class Graphics3dManager {
             }
 
         // Renders Buildings
-        if (data.buildings)
-            for (let i = 0; i < data.buildings.length; i++) {
-                let building: Building = data.buildings[i];
+        if (this.player.buildings)
+            for (let i = 0; i < this.player.buildings.length; i++) {
+                let building: Building = this.player.buildings[i];
                 let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
                 this.scene.add(buildingMesh);
                 buildingMesh.position.set(building.x, building.y, 0);
@@ -224,12 +232,12 @@ export default class Graphics3dManager {
         */
 
         // plane to get indicated point on a map
-        if (!this.surface) { // otherwise throws exceptions, since not every map event has columns and rows fields and they're not saved anywhere yet TODO
-            const geo = new THREE.PlaneGeometry(data.columns * SETTINGS.mapFieldSide, data.rows * SETTINGS.mapFieldSide);
+        if (!this.surface) {
+            const geo = new THREE.PlaneGeometry(this.player.columns * SETTINGS.mapFieldSide, this.player.rows * SETTINGS.mapFieldSide);
             const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
             this.surface = new THREE.Mesh(geo, material);
-            this.surface.position.x = (data.columns / 2) * SETTINGS.mapFieldSide;
-            this.surface.position.y = (data.rows / 2) * SETTINGS.mapFieldSide;
+            this.surface.position.x = (this.player.columns / 2) * SETTINGS.mapFieldSide;
+            this.surface.position.y = (this.player.rows / 2) * SETTINGS.mapFieldSide;
             this.surface.position.z = -1;
             this.scene.add(this.surface);
         }

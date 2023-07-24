@@ -5,6 +5,7 @@ import SocketManager from './SocketManager';
 import UIManager from './UIManager';
 import Cookies from 'js-cookie';
 import UIInterface from './UIInterface';
+import Player from '../../../strategy-common/dataClasses/Player';
 
 /**
  * 
@@ -28,4 +29,5 @@ class Main {
 
     }
 }
+Container.set(Player, new Player(-1, -1, -1));
 Container.get(Main); // to wbrew pozorom coś robi
