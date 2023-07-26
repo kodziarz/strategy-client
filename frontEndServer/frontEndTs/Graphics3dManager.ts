@@ -9,6 +9,8 @@ import Building from "./../../../strategy-common/dataClasses/Building";
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
 import Player from "../../../strategy-common/dataClasses/Player";
+import Grassland from "../../../strategy-common/dataClasses/mapFields/Grassland";
+import MapFieldMesh from "./meshes/MapFieldMesh";
 /**
  * Manages displaying 3d map.
  */
@@ -25,7 +27,7 @@ export default class Graphics3dManager {
     private renderer = new THREE.WebGLRenderer();
 
     private cube: THREE.Mesh = null;
-    private fieldsMeshes: THREE.Mesh[][];
+    private fieldsMeshes: MapFieldMesh[][];
 
     private gameMechanicsInterval: NodeJS.Timer;
     private beginningTime: number;
@@ -175,7 +177,7 @@ export default class Graphics3dManager {
 
 
     /**
-    * Creates {@link MapFieldMesh | map fields} and sets camera position.
+    * Creates {@link MapFieldMesh | map field meshes} and sets camera position.
     * @param data Map data from server.
     */
     private initiateFieldMeshes = () => {
@@ -206,14 +208,33 @@ export default class Graphics3dManager {
         if (!this.fieldsMeshes) this.initiateFieldMeshes();
 
         // Renders ObservedMapFields
-        if (this.player.observedMapFields)
-            for (let i = 0; i < this.player.observedMapFields.length; i++) {
-                let field: MapField = this.player.observedMapFields[i];
-                let mapFieldMesh = new GrasslandMesh(field);
-                this.fieldsMeshes[field.column][field.row] = mapFieldMesh;
-                this.scene.add(mapFieldMesh);
-                mapFieldMesh.position.set(field.x, field.y, 0);
+        for (let x = 0; x < this.player.columns; x++) {
+            for (let y = 0; y < this.player.rows; y++) {
+                let fieldMesh;
+                let mapField = this.player.observedMapFields.find((checkedMapField) => {
+                    return checkedMapField.column == x && checkedMapField.row == y;
+                });
+                if (mapField) {
+                    //if map field is observed
+                    fieldMesh = new GrasslandMesh(mapField);
+                    // this.fieldsMeshes[x][y].setObserved();
+                } else if (mapField = this.player.visitedMapFields.find((checkedMapField) => {
+                    return checkedMapField.column == x && checkedMapField.row == y;
+                })) {
+                    //if map field is visited
+                    fieldMesh = new GrasslandMesh(mapField);
+                    fieldMesh.setVisited();
+                } else {
+                    //map field is neither observed nor visited
+                    mapField = new Grassland(x, y);
+                    fieldMesh = new GrasslandMesh(mapField);
+                    fieldMesh.setInvisible();
+                }
+                this.fieldsMeshes[x][y] = fieldMesh;
+                this.scene.add(fieldMesh);
+                fieldMesh.position.set(mapField.x, mapField.y, 0);
             }
+        }
 
         // Renders Buildings
         if (this.player.buildings)
@@ -243,6 +264,19 @@ export default class Graphics3dManager {
         }
     };
 
+    discoverFields = (data: any) => {
+
+        if (data.observedMapFields) {
+            data.observedMapFields.forEach((mapField: MapField) => {
+                this.fieldsMeshes[mapField.column][mapField.row].setObserved();
+            });
+        }
+        if (data.visitedMapFields) {
+            data.visitedMapFields.forEach((mapField: MapField) => {
+                this.fieldsMeshes[mapField.column][mapField.row].setObserved();
+            });
+        }
+    };
 
 
 }

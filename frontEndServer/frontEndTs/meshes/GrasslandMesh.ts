@@ -17,4 +17,19 @@ export default class GrasslandMesh extends MapFieldMesh {
 
         this.mapFieldData = mapField;
     }
+
+    setVisited(): void {
+        const material = new THREE.MeshBasicMaterial({ color: 0x008800 });
+        this.material = material;
+    }
+
+    setObserved(): void {
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        this.material = material;
+    }
+    setInvisible(): void {
+        const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        this.material = material;
+    }
+
 }

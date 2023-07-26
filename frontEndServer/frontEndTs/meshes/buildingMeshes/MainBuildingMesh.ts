@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import MainBuilding from "./../../../../strategy-common/dataClasses/buildings/MainBuilding";
+import MainBuilding from "../../../../../strategy-common/dataClasses/buildings/MainBuilding";
 // import SETTINGS from "../SETTINGS";
-import BuildingMesh from "./BuildingMesh";
+import BuildingMesh from "../BuildingMesh";
 export default class MainBuildingMesh extends BuildingMesh {
 
     // mainBuildingData: MainBuilding;

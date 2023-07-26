@@ -6,8 +6,9 @@ import Graphics3dManager from "./Graphics3dManager";
 import envSettings from '../../settings.json';
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
-import { instantiateBuilding, instantiateMapField } from "./../../../strategy-common/classInstantiatingService";
+import { instantiateBuilding, instantiateMapField, instantiateOpponent } from "./../../../strategy-common/classInstantiatingService";
 import Player from "./../../../strategy-common/dataClasses/Player";
+import Opponent from "../../../strategy-common/dataClasses/Opponent";
 
 /**
  * Provides methods for socket communication with server.
@@ -59,6 +60,11 @@ export default class SocketManager {
                     return instantiateBuilding(building);
                 });
 
+            if (data.opponents)
+                tmp.opponents = data.opponents.map((opponent: Opponent) => {
+                    return instantiateOpponent(opponent);
+                });
+
             Object.assign(data, tmp);
             Object.assign(this.player, Object.fromEntries(Object.entries(data).filter(
                 ([key, value]) => {
@@ -80,6 +86,33 @@ export default class SocketManager {
             );
             this.graphics3dManager.scene.add(mesh);
             this.buildingPlaceIndicator.clear();
+        });
+
+        this.socket.on("mapFields", (data) => {
+            console.log("odebrano wydarzenie mapFields: ", data);
+            let tmp: any = {};
+            if (data.observedMapFields)
+                tmp.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
+                    return instantiateMapField(mapFieldData);
+                });
+            if (data.visitedMapFields)
+                tmp.visitedMapFields = data.visitedMapFields.map((mapFieldData: any) => {
+                    return instantiateMapField(mapFieldData);
+                });
+
+            Object.assign(data, tmp);
+            Object.assign(this.player, Object.fromEntries(Object.entries(data).filter(
+                ([key, value]) => {
+                    return (value == true || value == false) ? true : value;
+                    // if value is boolean, leace it in object, otherwise throw it out
+                    //if it is falsy (null, undefined etc)
+                })));
+            this.graphics3dManager.discoverFields(data);
+        });
+
+        this.socket.on("opponentBuilding", (data) => {
+            let opponent = this.player.getOpponentById(data.userId);
+
         });
     };
 

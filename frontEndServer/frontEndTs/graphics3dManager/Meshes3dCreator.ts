@@ -1,6 +1,6 @@
 import { Service } from "typedi";
 import BuildingsTypes from "./../../../../strategy-common/dataClasses/buildings/BuildingsTypes";
-import MainBuildingMesh from "../meshes/MainBuildingMesh";
+import MainBuildingMesh from "../meshes/buildingMeshes/MainBuildingMesh";
 import Building from "./../../../../strategy-common/dataClasses/Building";
 
 /**
