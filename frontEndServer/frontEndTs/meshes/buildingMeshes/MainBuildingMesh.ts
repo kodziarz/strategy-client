@@ -12,9 +12,13 @@ export default class MainBuildingMesh extends BuildingMesh {
             // SETTINGS.mapFieldSide - 2,
             // 1
         );
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const material = new THREE.MeshBasicMaterial({ color: 0x888888 });
         super(geometry, material, mainBuilding);
 
         // this.mainBuildingData = mainBuilding;
+    }
+
+    setOpponentsOwnership(): void {
+        this.material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     }
 }

@@ -76,8 +76,13 @@ export default class SocketManager {
             this.graphics3dManager.renderMap();
         });
 
-        this.socket.on("buildingPlaced", (data) => {
-            let building = instantiateBuilding(data.placedBuilding);
+        this.socket.on("opponentJoined", (opponent: Opponent) => {
+            console.log("dostałem info, że dołączył użytkownik o id: ", opponent.userId);
+            this.player.opponents.push(instantiateOpponent(opponent));
+        });
+
+        this.socket.on("buildingPlaced", (placedBuilding) => {
+            let building = instantiateBuilding(placedBuilding);
             let mesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
             mesh.position.set(
                 mesh.buildingData.x,
@@ -104,15 +109,32 @@ export default class SocketManager {
             Object.assign(this.player, Object.fromEntries(Object.entries(data).filter(
                 ([key, value]) => {
                     return (value == true || value == false) ? true : value;
-                    // if value is boolean, leace it in object, otherwise throw it out
-                    //if it is falsy (null, undefined etc)
+                    // if value is boolean, leave it in object, otherwise
+                    // throw it out if it is falsy (null, undefined etc)
                 })));
             this.graphics3dManager.discoverFields(data);
         });
 
         this.socket.on("opponentBuilding", (data) => {
-            let opponent = this.player.getOpponentById(data.userId);
+            console.log("dostałem info, że przeciwnik postawił budynek.");
 
+            let opponent = this.player.getOpponentById(data.opponentId);
+            console.log("data: ", data);
+            console.log("opponent: ", opponent);
+
+            let storedChangedBuildings: Building[] = [];
+            for (let i = 0; i < data.changedBuildings.length; i++) {
+                let changedBuilding = data.changedBuildings[i];
+                let building = opponent.buildings.find((building) => { return building.id == changedBuilding.id; });
+                if (building) {
+                    Object.assign(building, changedBuilding);
+                } else {
+                    building = instantiateBuilding(changedBuilding);
+                    opponent.buildings.push(building);
+                }
+                storedChangedBuildings.push(building);
+            }
+            this.graphics3dManager.discoverOpponentsBuildings(storedChangedBuildings);
         });
     };
 

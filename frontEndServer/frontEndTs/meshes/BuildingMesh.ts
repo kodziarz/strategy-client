@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { BufferGeometry, Material } from "three";
 import Building from "./../../../../strategy-common/dataClasses/Building";
-export default class BuildingMesh extends THREE.Mesh {
+export default abstract class BuildingMesh extends THREE.Mesh {
     buildingData: Building;
     constructor(geometry: BufferGeometry, material: Material, building: Building) {
         super(geometry, material);
@@ -19,4 +19,6 @@ export default class BuildingMesh extends THREE.Mesh {
             opacity: 0.7
         });
     };
+
+    abstract setOpponentsOwnership(): void;
 }

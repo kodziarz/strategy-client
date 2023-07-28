@@ -11,6 +11,10 @@ import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
 import Player from "../../../strategy-common/dataClasses/Player";
 import Grassland from "../../../strategy-common/dataClasses/mapFields/Grassland";
 import MapFieldMesh from "./meshes/MapFieldMesh";
+import BuildingMesh from "./meshes/BuildingMesh";
+import MainBuildingMesh from "./meshes/buildingMeshes/MainBuildingMesh";
+import MainBuilding from "../../../strategy-common/dataClasses/buildings/MainBuilding";
+import { instantiateBuilding } from "../../../strategy-common/classInstantiatingService";
 /**
  * Manages displaying 3d map.
  */
@@ -28,6 +32,7 @@ export default class Graphics3dManager {
 
     private cube: THREE.Mesh = null;
     private fieldsMeshes: MapFieldMesh[][];
+    buildingMeshes: BuildingMesh[] = [];
 
     private gameMechanicsInterval: NodeJS.Timer;
     private beginningTime: number;
@@ -245,6 +250,10 @@ export default class Graphics3dManager {
                 buildingMesh.position.set(building.x, building.y, 0);
             }
 
+        //renders opponents
+        if (this.player.opponents)
+            this.player.opponents.forEach((opponent) => { this.discoverOpponentsBuildings(opponent.buildings); });
+
         /*
         // Renders VisitedMapFields
         for (let i = 0; i < data.visitedMapFields.length; i++) {
@@ -277,6 +286,25 @@ export default class Graphics3dManager {
             });
         }
     };
-
-
+    /**
+     * Displays changed {@link Opponent}'s {@link Building}.
+     * @param changedBuildings {@link Building}s from {@link Player}.{@link Opponent}
+     * Needs to be already instantiated.
+     */
+    discoverOpponentsBuildings = (changedBuildings: Building[]) => {
+        changedBuildings.forEach((changedBuilding) => {
+            let buildingMesh = this.buildingMeshes.find((buildingMesh) => { return buildingMesh.buildingData.id == changedBuilding.id; });
+            if (!buildingMesh) {
+                buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(changedBuilding);
+                this.buildingMeshes.push(buildingMesh);
+                this.scene.add(buildingMesh);
+            }
+            buildingMesh.setOpponentsOwnership();
+            buildingMesh.position.set(
+                changedBuilding.x,
+                changedBuilding.y,
+                0
+            );
+        });
+    };
 }
