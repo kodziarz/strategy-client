@@ -6,9 +6,10 @@ import Graphics3dManager from "./Graphics3dManager";
 import envSettings from '../../settings.json';
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
-import { instantiateBuilding, instantiateMapField, instantiateOpponent } from "./../../../strategy-common/classInstantiatingService";
+import { instantiateOpponent, instantiateBuilding, instantiateMapField, fillMapField, fillBuilding } from "./../../../strategy-common/classInstantiatingService";
 import Player from "./../../../strategy-common/dataClasses/Player";
 import Opponent from "../../../strategy-common/dataClasses/Opponent";
+import MapField from "../../../strategy-common/dataClasses/MapField";
 
 /**
  * Provides methods for socket communication with server.
@@ -17,6 +18,16 @@ import Opponent from "../../../strategy-common/dataClasses/Opponent";
 export default class SocketManager {
     private readonly socket: Socket;
     private player: Player;
+    /**
+     * Array of buildings stored to use {@link classInstantiatingService} functions.
+     * It is fully managed by {@link SocketManager} which has to intecept needed data.
+     */
+    private allBuildings: Building[] = [];
+    /**
+     * Array of fields stored to use {@link classInstantiatingService} functions.
+     * It is fully managed by {@link SocketManager} which has to intecept needed data.
+     */
+    private fieldsMap: MapField[][];
 
     constructor(
         private readonly graphics3dManager: Graphics3dManager,
@@ -43,33 +54,65 @@ export default class SocketManager {
     private setEventListeners = () => {
         this.socket.on("connect", () => {
             console.log("uzyskano połączenie z serwerem.");
-            this.socket.emit("test", { random: "data" });
             this.socket.emit("map");
         });
 
         this.socket.on("map", (data: Player) => {
             console.log("odebrano wydarzenie map: ", data);
-            let tmp: any = {};
-            if (data.observedMapFields)
-                tmp.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
-                    return instantiateMapField(mapFieldData);
-                });
 
-            if (data.buildings)
-                tmp.buildings = data.buildings.map((building: Building) => {
-                    return instantiateBuilding(building);
+            if (this.fieldsMap == undefined) {
+                this.fieldsMap = [];
+                for (let x = 0; x < data.columns; x++) {
+                    this.fieldsMap[x] = [];
+                    // for (let y = 0; y < data.rows; y++) {
+                    //     this.fieldsMap[x][y] = null;
+                    // }
+                }
+            }
+
+            let tmp: any = {};
+            if (data.observedMapFields) {
+                tmp.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
+                    let mapField = instantiateMapField(mapFieldData);
+                    this.fieldsMap[mapField.column][mapField.row];
+                    return mapField;
                 });
+            }
+
+            let buildingsList = [];
+            data.opponents.forEach((opponent) => {
+                if (opponent.buildings.length > 0)
+                    buildingsList.push(...opponent.buildings);
+            });
+            if (data.buildings)
+                buildingsList.push(...data.buildings);
+
+            tmp.buildings = buildingsList.map((buildingData: Building) => {
+                let building = instantiateBuilding(buildingData);
+                this.allBuildings.push(building);
+                return building;
+            });
 
             if (data.opponents)
                 tmp.opponents = data.opponents.map((opponent: Opponent) => {
-                    return instantiateOpponent(opponent);
+                    return instantiateOpponent(opponent, this.allBuildings);
+                });
+
+            if (data.observedMapFields)
+                data.observedMapFields.forEach((mapField) => {
+                    fillMapField(mapField, this.allBuildings);
+                });
+
+            if (data.buildings)
+                data.buildings.forEach((building) => {
+                    fillBuilding(building, this.fieldsMap);
                 });
 
             Object.assign(data, tmp);
             Object.assign(this.player, Object.fromEntries(Object.entries(data).filter(
                 ([key, value]) => {
                     return (value == true || value == false) ? true : value;
-                    // if value is boolean, leace it in object, otherwise throw it out
+                    // if value is boolean, leave it in object, otherwise throw it out
                     //if it is falsy (null, undefined etc)
                 })));
 
@@ -78,11 +121,13 @@ export default class SocketManager {
 
         this.socket.on("opponentJoined", (opponent: Opponent) => {
             console.log("dostałem info, że dołączył użytkownik o id: ", opponent.userId);
-            this.player.opponents.push(instantiateOpponent(opponent));
+            this.player.opponents.push(instantiateOpponent(opponent, this.allBuildings));
         });
 
         this.socket.on("buildingPlaced", (placedBuilding) => {
             let building = instantiateBuilding(placedBuilding);
+            fillBuilding(building, this.fieldsMap);
+            this.allBuildings.push(building);
             let mesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
             mesh.position.set(
                 mesh.buildingData.x,
@@ -98,11 +143,34 @@ export default class SocketManager {
             let tmp: any = {};
             if (data.observedMapFields)
                 tmp.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
-                    return instantiateMapField(mapFieldData);
+                    if (this.fieldsMap[mapFieldData.column][mapFieldData.row] == undefined) {
+                        let observedMapField = instantiateMapField(mapFieldData);
+                        fillMapField(observedMapField, this.allBuildings);
+                        this.fieldsMap[observedMapField.x][observedMapField.y] = observedMapField;
+                        return observedMapField;
+                    } else {
+                        fillMapField(mapFieldData, this.allBuildings);
+                        return Object.assign(
+                            this.fieldsMap[mapFieldData.column][mapFieldData.row],
+                            mapFieldData
+                        );
+                    }
+
                 });
             if (data.visitedMapFields)
                 tmp.visitedMapFields = data.visitedMapFields.map((mapFieldData: any) => {
-                    return instantiateMapField(mapFieldData);
+                    if (this.fieldsMap[mapFieldData.column][mapFieldData.row] == undefined) {
+                        let visitedMapField = instantiateMapField(mapFieldData);
+                        fillMapField(visitedMapField, this.allBuildings);
+                        this.fieldsMap[visitedMapField.x][visitedMapField.y] = visitedMapField;
+                        return visitedMapField;
+                    } else {
+                        fillMapField(mapFieldData, this.allBuildings);
+                        return Object.assign(
+                            this.fieldsMap[mapFieldData.column][mapFieldData.row],
+                            mapFieldData
+                        );
+                    }
                 });
 
             Object.assign(data, tmp);
@@ -130,6 +198,8 @@ export default class SocketManager {
                     Object.assign(building, changedBuilding);
                 } else {
                     building = instantiateBuilding(changedBuilding);
+                    fillBuilding(building, this.fieldsMap);
+                    this.allBuildings.push(building);
                     opponent.buildings.push(building);
                 }
                 storedChangedBuildings.push(building);
