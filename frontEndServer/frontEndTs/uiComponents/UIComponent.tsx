@@ -9,6 +9,7 @@ import UIInterface from "../UIInterface";
 import MainBuilding from "./../../../../strategy-common/dataClasses/buildings/MainBuilding";
 import FunctionalOverlay from "./FunctionalOverlay";
 import SettingsButton from "./SettingsButton";
+import Player from "../../../../strategy-common/dataClasses/Player";
 
 
 interface UIComponentState {
@@ -23,12 +24,14 @@ export default class UIComponent extends React.Component<{}, UIComponentState> {
 
     private threeJSDivRef: React.RefObject<HTMLDivElement>;
     private uiInterface: UIInterface;
+    private player: Player;
 
     constructor(props: {}) {
         super(props);
         this.state = { isOverlayVisible: false, overlayFunction: 'settings' };
         this.threeJSDivRef = React.createRef();
         this.uiInterface = Container.get(UIInterface);
+        this.player = Container.get(Player);
     }
 
     componentDidMount(): void {
@@ -61,7 +64,7 @@ export default class UIComponent extends React.Component<{}, UIComponentState> {
                             } />
                             <NewBuildingButton onNewBuilding={
                                 async () => {
-                                    let mesh = await this.uiInterface.placeBuilding(new MainBuilding(0, 0));
+                                    let mesh = await this.uiInterface.placeBuilding(new MainBuilding(0, 0, this.player.userId));
                                 }} />
                         </div>
                         <div style={{ display: "flex", flex: 25, flexDirection: "row" }}>

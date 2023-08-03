@@ -223,8 +223,8 @@ export default class SocketManager {
 
     /**
      * Creates building, if it has not been already created. By creation is meant:
-     * instantialization, addition to {@link allBuildings} array and creation of 
-     * 3d object.
+     * instantialization, addition to {@link allBuildings} array, addition to 
+     * proper {@link Opponent} and creation of 3d object.
      * @param building Processed building data.
      * @returns Created {@link Building} or null, if already existed.
      */
@@ -233,6 +233,7 @@ export default class SocketManager {
             return null;
         let instantiatedBuilding = instantiateBuilding(building);
         this.allBuildings.push(instantiatedBuilding);
+        this.player.getOpponentById(building.ownerId).buildings.push(building);
         this.graphics3dManager.discoverOpponentsBuildings([building]);
     };
 }
