@@ -237,7 +237,7 @@ export default class Graphics3dManager {
                 }
                 this.fieldsMeshes[x][y] = fieldMesh;
                 this.scene.add(fieldMesh);
-                fieldMesh.position.set(mapField.x, mapField.y, 0);
+                fieldMesh.position.set(mapField.centerX, mapField.centerY, 0);
             }
         }
 
@@ -245,9 +245,7 @@ export default class Graphics3dManager {
         if (this.player.buildings)
             for (let i = 0; i < this.player.buildings.length; i++) {
                 let building: Building = this.player.buildings[i];
-                let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
-                this.scene.add(buildingMesh);
-                buildingMesh.position.set(building.x, building.y, 0);
+                this.createBuilding(building);
             }
 
         //renders opponents
@@ -271,6 +269,12 @@ export default class Graphics3dManager {
             this.surface.position.z = -1;
             this.scene.add(this.surface);
         }
+    };
+
+    createBuilding = (buildingData: Building) => {
+        let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(buildingData);
+        this.scene.add(buildingMesh);
+        buildingMesh.position.set(buildingData.x, buildingData.y, 0);
     };
 
     discoverFields = (data: any) => {

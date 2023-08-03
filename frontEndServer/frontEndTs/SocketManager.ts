@@ -79,32 +79,35 @@ export default class SocketManager {
                 });
             }
 
-            let buildingsList = [];
             data.opponents.forEach((opponent) => {
-                if (opponent.buildings.length > 0)
-                    buildingsList.push(...opponent.buildings);
+                // if (opponent.buildings.length > 0)
+                //     buildingsList.push(...opponent.buildings);
+                opponent.buildings = opponent.buildings.map((building) => {
+                    let instantiatedBuilding = instantiateBuilding(building);
+                    this.allBuildings.push(instantiatedBuilding);
+                    return instantiatedBuilding;
+                });
             });
-            if (data.buildings)
-                buildingsList.push(...data.buildings);
 
-            tmp.buildings = buildingsList.map((buildingData: Building) => {
-                let building = instantiateBuilding(buildingData);
-                this.allBuildings.push(building);
-                return building;
-            });
+            if (data.buildings)
+                tmp.buildings = data.buildings.map((buildingData: Building) => {
+                    let building = instantiateBuilding(buildingData);
+                    this.allBuildings.push(building);
+                    return building;
+                });
 
             if (data.opponents)
                 tmp.opponents = data.opponents.map((opponent: Opponent) => {
                     return instantiateOpponent(opponent, this.allBuildings);
                 });
 
-            if (data.observedMapFields)
-                data.observedMapFields.forEach((mapField) => {
+            if (tmp.observedMapFields)
+                tmp.observedMapFields.forEach((mapField: MapField) => {
                     fillMapField(mapField, this.allBuildings);
                 });
 
-            if (data.buildings)
-                data.buildings.forEach((building) => {
+            if (tmp.buildings)
+                tmp.buildings.forEach((building: Building) => {
                     fillBuilding(building, this.fieldsMap);
                 });
 
@@ -145,10 +148,16 @@ export default class SocketManager {
                 tmp.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
                     if (this.fieldsMap[mapFieldData.column][mapFieldData.row] == undefined) {
                         let observedMapField = instantiateMapField(mapFieldData);
+                        observedMapField.buildings.forEach((newBuilding) => {
+                            this.createOpponentsBuildingIfDoesNotExist(newBuilding);
+                        });
                         fillMapField(observedMapField, this.allBuildings);
-                        this.fieldsMap[observedMapField.x][observedMapField.y] = observedMapField;
+                        this.fieldsMap[observedMapField.column][observedMapField.row] = observedMapField;
                         return observedMapField;
                     } else {
+                        mapFieldData.buildings.forEach((newBuilding: Building) => {
+                            this.createOpponentsBuildingIfDoesNotExist(newBuilding);
+                        });
                         fillMapField(mapFieldData, this.allBuildings);
                         return Object.assign(
                             this.fieldsMap[mapFieldData.column][mapFieldData.row],
@@ -162,7 +171,7 @@ export default class SocketManager {
                     if (this.fieldsMap[mapFieldData.column][mapFieldData.row] == undefined) {
                         let visitedMapField = instantiateMapField(mapFieldData);
                         fillMapField(visitedMapField, this.allBuildings);
-                        this.fieldsMap[visitedMapField.x][visitedMapField.y] = visitedMapField;
+                        this.fieldsMap[visitedMapField.column][visitedMapField.row] = visitedMapField;
                         return visitedMapField;
                     } else {
                         fillMapField(mapFieldData, this.allBuildings);
@@ -210,5 +219,20 @@ export default class SocketManager {
 
     placeBuilding = (building: Building) => {
         this.socket.emit("building", building);
+    };
+
+    /**
+     * Creates building, if it has not been already created. By creation is meant:
+     * instantialization, addition to {@link allBuildings} array and creation of 
+     * 3d object.
+     * @param building Processed building data.
+     * @returns Created {@link Building} or null, if already existed.
+     */
+    createOpponentsBuildingIfDoesNotExist = (building: Building): Building | null => {
+        if (this.allBuildings.find((checkedBuilding) => { return checkedBuilding.id == building.id; }))
+            return null;
+        let instantiatedBuilding = instantiateBuilding(building);
+        this.allBuildings.push(instantiatedBuilding);
+        this.graphics3dManager.discoverOpponentsBuildings([building]);
     };
 }
