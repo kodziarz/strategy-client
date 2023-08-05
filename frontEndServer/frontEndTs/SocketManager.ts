@@ -12,6 +12,7 @@ import Opponent from "../../../strategy-common/dataClasses/Opponent";
 import DataBinder from "./socketManager/DataBinder";
 import MapChangesMessage from "./../../../strategy-common/socketioMessagesClasses/MapChangesMessage";
 import BuildingWithIdentifiers from "../../../strategy-common/socketioMessagesClasses/BuildingWithIdentifiers";
+import Unit from "../../../strategy-common/dataClasses/Unit";
 
 /**
  * Provides methods for socket communication with server.
@@ -82,6 +83,10 @@ export default class SocketManager {
             this.buildingPlaceIndicator.clear();
         });
 
+        this.socket.on("unitCreated", (createdUnit: Unit) => {
+            console.log("otrzymałem potwierdzenie utworzenia jednostki: ", createdUnit);
+        });
+
         this.socket.on("mapChanges", (data: MapChangesMessage) => {
             console.log("odebrano wydarzenie mapChanges: ", data);
 
@@ -123,5 +128,9 @@ export default class SocketManager {
         if (building.occupiedFields.length > 0)
             throw new Error("Passed building argument has some occupiedFields. At this stage there cannot be any occupiedFields because of recursion errors.");
         this.socket.emit("building", building);
+    };
+
+    createUnit = (unit: Unit) => {
+        this.socket.emit("unit", unit);
     };
 }

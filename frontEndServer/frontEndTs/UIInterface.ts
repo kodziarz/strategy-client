@@ -5,6 +5,7 @@ import UIManager from "./UIManager";
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import BuildingMesh from "./meshes/BuildingMesh";
 import SocketManager from "./SocketManager";
+import Unit from "../../../strategy-common/dataClasses/Unit";
 
 /**
  * Intercedes between {@link UIManager} and inner, background classes (e.g. {@link Graphics3dManager}).
@@ -31,6 +32,10 @@ export default class UIInterface {
         console.log("Właśnie postawiono budynek: ", mesh);
         this.socketManager.placeBuilding(mesh.buildingData);
         return mesh;
+    };
+
+    createUnit = async (unit: Unit) => {
+        this.socketManager.createUnit(unit);
     };
 
 }

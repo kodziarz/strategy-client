@@ -1,7 +1,5 @@
 import React from "react";
 import Container from "typedi";
-import Graphics3dManager from "../Graphics3dManager";
-import SETTINGS from "../SETTINGS";
 import ResourcesBar from "./ResourcesBar";
 import NewBuildingButton from "./NewBuildingButton";
 import MapMovingComponent from "./MapMovingComponent";
@@ -10,6 +8,7 @@ import MainBuilding from "./../../../../strategy-common/dataClasses/buildings/Ma
 import FunctionalOverlay from "./FunctionalOverlay";
 import SettingsButton from "./SettingsButton";
 import Player from "../../../../strategy-common/dataClasses/Player";
+import Builder from "../../../../strategy-common/dataClasses/units/Builder";
 
 
 interface UIComponentState {
@@ -65,6 +64,11 @@ export default class UIComponent extends React.Component<{}, UIComponentState> {
                             <NewBuildingButton onNewBuilding={
                                 async () => {
                                     let mesh = await this.uiInterface.placeBuilding(new MainBuilding(0, 0, this.player.userId));
+                                }} />
+                            {/* quite temporary xd */}
+                            <NewBuildingButton onNewBuilding={
+                                async () => {
+                                    this.uiInterface.createUnit(new Builder(this.player.userId));
                                 }} />
                         </div>
                         <div style={{ display: "flex", flex: 25, flexDirection: "row" }}>
