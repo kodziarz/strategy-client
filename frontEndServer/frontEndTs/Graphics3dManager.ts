@@ -12,9 +12,9 @@ import Player from "../../../strategy-common/dataClasses/Player";
 import Grassland from "../../../strategy-common/dataClasses/mapFields/Grassland";
 import MapFieldMesh from "./meshes/MapFieldMesh";
 import BuildingMesh from "./meshes/BuildingMesh";
-import MainBuildingMesh from "./meshes/buildingMeshes/MainBuildingMesh";
-import MainBuilding from "../../../strategy-common/dataClasses/buildings/MainBuilding";
-import { instantiateBuilding } from "../../../strategy-common/classInstantiatingService";
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+
 /**
  * Manages displaying 3d map.
  */
@@ -63,8 +63,6 @@ export default class Graphics3dManager {
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        this.cube = new THREE.Mesh(geometry, material);
-        this.scene.add(this.cube);
         let axes = new THREE.AxesHelper(500);
         this.scene.add(axes);
 
@@ -129,13 +127,13 @@ export default class Graphics3dManager {
         this.moveCamera(deltaTime);
     };
 
-    /**
-     * @example
-     */
-    moveCube = (deltaTime: number, intervenedTime: number) => {
-        this.cube.rotation.x += 0.6 * deltaTime;
-        this.cube.position.x = Math.sin(intervenedTime / 1000) * 5;
-    };
+    // /**
+    //  * @example
+    //  */
+    // moveCube = (deltaTime: number, intervenedTime: number) => {
+    //     this.cube.rotation.x += 0.6 * deltaTime;
+    //     this.cube.position.x = Math.sin(intervenedTime / 1000) * 5;
+    // };
 
     /**
      * Moves the camera according to {@link cameraXVelocity} and
@@ -273,6 +271,28 @@ export default class Graphics3dManager {
             this.surface.position.z = -1;
             this.scene.add(this.surface);
         }
+
+
+        //loading 3d model
+        // const loader = new GLTFLoader();
+
+        // //reportedely optional
+        // const dracoLoader = new DRACOLoader();
+        // dracoLoader.setDecoderPath("/draco/");
+        // loader.setDRACOLoader(dracoLoader);
+
+
+        // loader.load("models/2CylinderEngine.gltf", (gltf) => {
+        //     this.scene.add(gltf.scene);
+        //     console.log(gltf instanceof THREE.Object3D);
+
+        // });
+
+        // const color = 0x888888;
+        // const intensity = 1;
+        // const light = new THREE.AmbientLight(color, intensity);
+        // this.scene.add(light);
+
     };
 
     /**
