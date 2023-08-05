@@ -248,9 +248,13 @@ export default class Graphics3dManager {
                 this.createBuilding(building);
             }
 
-        //renders opponents
+        //renders opponents' building
         if (this.player.opponents)
-            this.player.opponents.forEach((opponent) => { this.discoverOpponentsBuildings(opponent.buildings); });
+            this.player.opponents.forEach((opponent) => {
+                opponent.buildings.forEach((building) => {
+                    this.createBuilding(building);
+                });
+            });
 
         /*
         // Renders VisitedMapFields
@@ -271,44 +275,49 @@ export default class Graphics3dManager {
         }
     };
 
-    createBuilding = (buildingData: Building) => {
+    /**
+     * Creates building mesh and adds it to {@link scene}.
+     * @param buildingData Building data, which the {@link BuildingMesh} is
+     * based on.
+     * @returns Created building mesh.
+     */
+    createBuilding = (buildingData: Building): BuildingMesh => {
         let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(buildingData);
         this.scene.add(buildingMesh);
         buildingMesh.position.set(buildingData.x, buildingData.y, 0);
-    };
 
-    discoverFields = (data: any) => {
-
-        if (data.observedMapFields) {
-            data.observedMapFields.forEach((mapField: MapField) => {
-                this.fieldsMeshes[mapField.column][mapField.row].setObserved();
-            });
-        }
-        if (data.visitedMapFields) {
-            data.visitedMapFields.forEach((mapField: MapField) => {
-                this.fieldsMeshes[mapField.column][mapField.row].setObserved();
-            });
-        }
-    };
-    /**
-     * Displays changed {@link Opponent}'s {@link Building}.
-     * @param changedBuildings {@link Building}s from {@link Player}.{@link Opponent}
-     * Needs to be already instantiated.
-     */
-    discoverOpponentsBuildings = (changedBuildings: Building[]) => {
-        changedBuildings.forEach((changedBuilding) => {
-            let buildingMesh = this.buildingMeshes.find((buildingMesh) => { return buildingMesh.buildingData.id == changedBuilding.id; });
-            if (!buildingMesh) {
-                buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(changedBuilding);
-                this.buildingMeshes.push(buildingMesh);
-                this.scene.add(buildingMesh);
-            }
+        if (buildingData.ownerId != this.player.userId)
             buildingMesh.setOpponentsOwnership();
-            buildingMesh.position.set(
-                changedBuilding.x,
-                changedBuilding.y,
-                0
-            );
+
+        return buildingMesh;
+    };
+
+    /**
+     * Updates {@link BuildingMesh} according to given data, or creates it, if
+     * it has not been created yet.
+     * @param building Building data, which creation or update of
+     * {@link BuildingMesh} is based on.
+     * @returns Created building mesh.
+     */
+    updateOrCreateBuilding = (building: Building): BuildingMesh => {
+        let buildingMesh = this.buildingMeshes.find((buildingMesh) => { return buildingMesh.buildingData.id == building.id; });
+        if (!buildingMesh) {
+            buildingMesh = this.createBuilding(building);
+        } else {
+            // probably something xd
+        }
+        return buildingMesh;
+    };
+
+    /**
+     * Shows not displayed {@link MapFieldMesh}es of given {@link MapField}s' data.
+     * @param observedMapFields Fields which should be shown to player.
+     */
+    discoverFields = (observedMapFields: MapField[]) => {
+
+        observedMapFields.forEach((mapField: MapField) => {
+            this.fieldsMeshes[mapField.column][mapField.row].setObserved();
         });
+
     };
 }

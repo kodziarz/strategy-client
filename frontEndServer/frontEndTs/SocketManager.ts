@@ -6,10 +6,11 @@ import Graphics3dManager from "./Graphics3dManager";
 import envSettings from '../../settings.json';
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
-import { instantiateOpponent, instantiateBuilding, instantiateMapField, fillMapField, fillBuilding } from "./../../../strategy-common/classInstantiatingService";
+import { instantiateOpponent, instantiateBuilding, instantiateMapField, fillMapField } from "./../../../strategy-common/classInstantiatingService";
 import Player from "./../../../strategy-common/dataClasses/Player";
 import Opponent from "../../../strategy-common/dataClasses/Opponent";
-import MapField from "../../../strategy-common/dataClasses/MapField";
+import DataBinder from "./socketManager/DataBinder";
+import MapChangedMessage from "./../../../strategy-common/socketMessagesClasses/mapChangesMessage";
 
 /**
  * Provides methods for socket communication with server.
@@ -18,21 +19,12 @@ import MapField from "../../../strategy-common/dataClasses/MapField";
 export default class SocketManager {
     private readonly socket: Socket;
     private player: Player;
-    /**
-     * Array of buildings stored to use {@link classInstantiatingService} functions.
-     * It is fully managed by {@link SocketManager} which has to intecept needed data.
-     */
-    private allBuildings: Building[] = [];
-    /**
-     * Array of fields stored to use {@link classInstantiatingService} functions.
-     * It is fully managed by {@link SocketManager} which has to intecept needed data.
-     */
-    private fieldsMap: MapField[][];
 
     constructor(
         private readonly graphics3dManager: Graphics3dManager,
         private readonly buildingPlaceIndicator: BuildingPlaceIndicator,
         private readonly meshes3dCreator: Meshes3dCreator,
+        private readonly dataBinder: DataBinder
     ) {
         this.socket = io(`ws://${envSettings.serverAddress}`, {
             transportOptions: {
@@ -54,83 +46,31 @@ export default class SocketManager {
     private setEventListeners = () => {
         this.socket.on("connect", () => {
             console.log("uzyskano połączenie z serwerem.");
-            this.socket.emit("map");
+            this.socket.emit("init");
         });
 
-        this.socket.on("map", (data: Player) => {
+        this.socket.on("init", (data: Player) => {
             console.log("odebrano wydarzenie map: ", data);
 
-            if (this.fieldsMap == undefined) {
-                this.fieldsMap = [];
-                for (let x = 0; x < data.columns; x++) {
-                    this.fieldsMap[x] = [];
-                    // for (let y = 0; y < data.rows; y++) {
-                    //     this.fieldsMap[x][y] = null;
-                    // }
-                }
-            }
+            this.dataBinder.bindMapEventData(data);
 
-            let tmp: any = {};
-            if (data.observedMapFields) {
-                tmp.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
-                    let mapField = instantiateMapField(mapFieldData);
-                    this.fieldsMap[mapField.column][mapField.row];
-                    return mapField;
-                });
-            }
-
-            data.opponents.forEach((opponent) => {
-                // if (opponent.buildings.length > 0)
-                //     buildingsList.push(...opponent.buildings);
-                opponent.buildings = opponent.buildings.map((building) => {
-                    let instantiatedBuilding = instantiateBuilding(building);
-                    this.allBuildings.push(instantiatedBuilding);
-                    return instantiatedBuilding;
-                });
-            });
-
-            if (data.buildings)
-                tmp.buildings = data.buildings.map((buildingData: Building) => {
-                    let building = instantiateBuilding(buildingData);
-                    this.allBuildings.push(building);
-                    return building;
-                });
-
-            if (data.opponents)
-                tmp.opponents = data.opponents.map((opponent: Opponent) => {
-                    return instantiateOpponent(opponent, this.allBuildings);
-                });
-
-            if (tmp.observedMapFields)
-                tmp.observedMapFields.forEach((mapField: MapField) => {
-                    fillMapField(mapField, this.allBuildings);
-                });
-
-            if (tmp.buildings)
-                tmp.buildings.forEach((building: Building) => {
-                    fillBuilding(building, this.fieldsMap);
-                });
-
-            Object.assign(data, tmp);
+            //player is already instantiated in main.ts
             Object.assign(this.player, Object.fromEntries(Object.entries(data).filter(
                 ([key, value]) => {
-                    return (value == true || value == false) ? true : value;
-                    // if value is boolean, leave it in object, otherwise throw it out
-                    //if it is falsy (null, undefined etc)
+                    return value != null && value != undefined;
+                    // filter out unefined and null values
                 })));
-
             this.graphics3dManager.renderMap();
         });
 
         this.socket.on("opponentJoined", (opponent: Opponent) => {
             console.log("dostałem info, że dołączył użytkownik o id: ", opponent.userId);
-            this.player.opponents.push(instantiateOpponent(opponent, this.allBuildings));
+            let actualOpponent = this.dataBinder.receiveOpponentData(opponent);
+            this.player.opponents.push(actualOpponent);
         });
 
         this.socket.on("buildingPlaced", (placedBuilding) => {
-            let building = instantiateBuilding(placedBuilding);
-            fillBuilding(building, this.fieldsMap);
-            this.allBuildings.push(building);
+            let building = this.dataBinder.receivePlacedBuilding(placedBuilding);
             let mesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
             mesh.position.set(
                 mesh.buildingData.x,
@@ -141,99 +81,38 @@ export default class SocketManager {
             this.buildingPlaceIndicator.clear();
         });
 
-        this.socket.on("mapFields", (data) => {
-            console.log("odebrano wydarzenie mapFields: ", data);
-            let tmp: any = {};
-            if (data.observedMapFields)
-                tmp.observedMapFields = data.observedMapFields.map((mapFieldData: any) => {
-                    if (this.fieldsMap[mapFieldData.column][mapFieldData.row] == undefined) {
-                        let observedMapField = instantiateMapField(mapFieldData);
-                        observedMapField.buildings.forEach((newBuilding) => {
-                            this.createOpponentsBuildingIfDoesNotExist(newBuilding);
-                        });
-                        fillMapField(observedMapField, this.allBuildings);
-                        this.fieldsMap[observedMapField.column][observedMapField.row] = observedMapField;
-                        return observedMapField;
-                    } else {
-                        mapFieldData.buildings.forEach((newBuilding: Building) => {
-                            this.createOpponentsBuildingIfDoesNotExist(newBuilding);
-                        });
-                        fillMapField(mapFieldData, this.allBuildings);
-                        return Object.assign(
-                            this.fieldsMap[mapFieldData.column][mapFieldData.row],
-                            mapFieldData
-                        );
-                    }
+        this.socket.on("mapChanges", (data: MapChangedMessage) => {
+            console.log("odebrano wydarzenie mapChanges: ", data);
 
-                });
-            if (data.visitedMapFields)
-                tmp.visitedMapFields = data.visitedMapFields.map((mapFieldData: any) => {
-                    if (this.fieldsMap[mapFieldData.column][mapFieldData.row] == undefined) {
-                        let visitedMapField = instantiateMapField(mapFieldData);
-                        fillMapField(visitedMapField, this.allBuildings);
-                        this.fieldsMap[visitedMapField.column][visitedMapField.row] = visitedMapField;
-                        return visitedMapField;
-                    } else {
-                        fillMapField(mapFieldData, this.allBuildings);
-                        return Object.assign(
-                            this.fieldsMap[mapFieldData.column][mapFieldData.row],
-                            mapFieldData
-                        );
+            this.dataBinder.bindMapChangesEvent(data);
+
+            if (data.changedFields)
+                this.player.observedMapFields.push(...data.changedFields);
+
+            if (data.changedBuildings)
+                data.changedBuildings.forEach((changedBuilding) => {
+                    if (changedBuilding.ownerId == this.player.userId) {
+                        if (!this.player.buildings.find((checkedBuilding) => { return checkedBuilding.id == changedBuilding.id; })) {
+                            //if player has not got the building yet
+                            this.player.buildings.push(changedBuilding);
+                            this.graphics3dManager.createBuilding(changedBuilding);
+                        }
+                    } else { //building is owned by opponent
+                        let opponent = this.player.getOpponentById(changedBuilding.ownerId);
+                        if (!opponent.buildings.find((checkedBuilding) => { return checkedBuilding.id == changedBuilding.id; })) {
+                            // if opponent has not got the building yet
+                            opponent.buildings.push(changedBuilding);
+                            this.graphics3dManager.createBuilding(changedBuilding);
+                        }
                     }
                 });
 
-            Object.assign(data, tmp);
-            Object.assign(this.player, Object.fromEntries(Object.entries(data).filter(
-                ([key, value]) => {
-                    return (value == true || value == false) ? true : value;
-                    // if value is boolean, leave it in object, otherwise
-                    // throw it out if it is falsy (null, undefined etc)
-                })));
-            this.graphics3dManager.discoverFields(data);
-        });
-
-        this.socket.on("opponentBuilding", (data) => {
-            console.log("dostałem info, że przeciwnik postawił budynek.");
-
-            let opponent = this.player.getOpponentById(data.opponentId);
-            console.log("data: ", data);
-            console.log("opponent: ", opponent);
-
-            let storedChangedBuildings: Building[] = [];
-            for (let i = 0; i < data.changedBuildings.length; i++) {
-                let changedBuilding = data.changedBuildings[i];
-                let building = opponent.buildings.find((building) => { return building.id == changedBuilding.id; });
-                if (building) {
-                    Object.assign(building, changedBuilding);
-                } else {
-                    building = instantiateBuilding(changedBuilding);
-                    fillBuilding(building, this.fieldsMap);
-                    this.allBuildings.push(building);
-                    opponent.buildings.push(building);
-                }
-                storedChangedBuildings.push(building);
-            }
-            this.graphics3dManager.discoverOpponentsBuildings(storedChangedBuildings);
+            if (data.changedFields)
+                this.graphics3dManager.discoverFields(data.changedFields);
         });
     };
 
     placeBuilding = (building: Building) => {
         this.socket.emit("building", building);
-    };
-
-    /**
-     * Creates building, if it has not been already created. By creation is meant:
-     * instantialization, addition to {@link allBuildings} array, addition to 
-     * proper {@link Opponent} and creation of 3d object.
-     * @param building Processed building data.
-     * @returns Created {@link Building} or null, if already existed.
-     */
-    createOpponentsBuildingIfDoesNotExist = (building: Building): Building | null => {
-        if (this.allBuildings.find((checkedBuilding) => { return checkedBuilding.id == building.id; }))
-            return null;
-        let instantiatedBuilding = instantiateBuilding(building);
-        this.allBuildings.push(instantiatedBuilding);
-        this.player.getOpponentById(building.ownerId).buildings.push(building);
-        this.graphics3dManager.discoverOpponentsBuildings([building]);
     };
 }
