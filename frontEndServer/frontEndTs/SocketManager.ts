@@ -10,7 +10,8 @@ import { instantiateOpponent, instantiateBuilding, instantiateMapField, fillMapF
 import Player from "./../../../strategy-common/dataClasses/Player";
 import Opponent from "../../../strategy-common/dataClasses/Opponent";
 import DataBinder from "./socketManager/DataBinder";
-import MapChangedMessage from "./../../../strategy-common/socketMessagesClasses/mapChangesMessage";
+import MapChangesMessage from "./../../../strategy-common/socketioMessagesClasses/MapChangesMessage";
+import BuildingWithIdentifiers from "../../../strategy-common/socketioMessagesClasses/BuildingWithIdentifiers";
 
 /**
  * Provides methods for socket communication with server.
@@ -69,7 +70,7 @@ export default class SocketManager {
             this.player.opponents.push(actualOpponent);
         });
 
-        this.socket.on("buildingPlaced", (placedBuilding) => {
+        this.socket.on("buildingPlaced", (placedBuilding: BuildingWithIdentifiers) => {
             let building = this.dataBinder.receivePlacedBuilding(placedBuilding);
             let mesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
             mesh.position.set(
@@ -81,16 +82,16 @@ export default class SocketManager {
             this.buildingPlaceIndicator.clear();
         });
 
-        this.socket.on("mapChanges", (data: MapChangedMessage) => {
+        this.socket.on("mapChanges", (data: MapChangesMessage) => {
             console.log("odebrano wydarzenie mapChanges: ", data);
 
-            this.dataBinder.bindMapChangesEvent(data);
+            let boundData = this.dataBinder.bindMapChangesEvent(data);
 
-            if (data.changedFields)
-                this.player.observedMapFields.push(...data.changedFields);
+            if (boundData.changedFields)
+                this.player.observedMapFields.push(...boundData.changedFields);
 
-            if (data.changedBuildings)
-                data.changedBuildings.forEach((changedBuilding) => {
+            if (boundData.changedBuildings)
+                boundData.changedBuildings.forEach((changedBuilding) => {
                     if (changedBuilding.ownerId == this.player.userId) {
                         if (!this.player.buildings.find((checkedBuilding) => { return checkedBuilding.id == changedBuilding.id; })) {
                             //if player has not got the building yet
@@ -107,12 +108,20 @@ export default class SocketManager {
                     }
                 });
 
-            if (data.changedFields)
-                this.graphics3dManager.discoverFields(data.changedFields);
+            if (boundData.changedFields)
+                this.graphics3dManager.discoverFields(boundData.changedFields);
         });
     };
 
-    placeBuilding = (building: Building) => {
+    /**
+     * Sends request to server to place building.
+     * @param building Data of building to place (there cannot be any occupiedFields).
+     * The actual id of building will be replaced by sever and returned in
+     * "buildingPlaced" event.
+     */
+    placeBuilding = (building: BuildingWithIdentifiers) => {
+        if (building.occupiedFields.length > 0)
+            throw new Error("Passed building argument has some occupiedFields. At this stage there cannot be any occupiedFields because of recursion errors.");
         this.socket.emit("building", building);
     };
 }

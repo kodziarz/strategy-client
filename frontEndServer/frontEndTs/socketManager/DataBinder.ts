@@ -4,8 +4,9 @@ import Building from "../../../../strategy-common/dataClasses/Building";
 import MapField from "../../../../strategy-common/dataClasses/MapField";
 import Opponent from "../../../../strategy-common/dataClasses/Opponent";
 import Player from "../../../../strategy-common/dataClasses/Player";
-import MapChangesMessage from "../../../../strategy-common/socketMessagesClasses/mapChangesMessage";
+import MapChangesMessage from "../../../../strategy-common/socketioMessagesClasses/MapChangesMessage";
 import MapFieldPlaceholder from "./MapFieldPlaceholder";
+import BuildingWithIdentifiers from "../../../../strategy-common/socketioMessagesClasses/BuildingWithIdentifiers";
 
 /**
  * Instantiates and binds received JSON data. Used by {@link SocketManager}.
@@ -94,17 +95,19 @@ export default class DataBinder {
         return instantiateOpponent(opponent, this.allBuildings);
     };
 
-    receivePlacedBuilding = (placedBuilding: Building) => {
+    receivePlacedBuilding = (placedBuilding: BuildingWithIdentifiers) => {
         let building = instantiateBuilding(placedBuilding);
         this.fillBuilding(building);
         this.allBuildings.push(building);
         return building;
     };
 
-    bindMapChangesEvent = (data: MapChangesMessage): MapChangesMessage => {
+    bindMapChangesEvent = (data: MapChangesMessage): BoundMapChangesMessage => {
+
+        let boundData: BoundMapChangesMessage = {};
 
         if (data.changedFields)
-            data.changedFields = data.changedFields.map((mapFieldData) => {
+            boundData.changedFields = data.changedFields.map((mapFieldData) => {
                 let currentFromFieldsMap = this.fieldsMap[mapFieldData.column][mapFieldData.row];
                 if (currentFromFieldsMap instanceof MapFieldPlaceholder) {
                     // if field is new for us
@@ -126,19 +129,19 @@ export default class DataBinder {
             });
 
         if (data.changedBuildings)
-            data.changedBuildings = data.changedBuildings.map((changedBuilding) => {
+            boundData.changedBuildings = data.changedBuildings.map((changedBuilding) => {
                 let instantiatedBuilding = instantiateBuilding(changedBuilding);
                 this.allBuildings.push(instantiatedBuilding);
                 return instantiatedBuilding;
             });
 
-        if (data.changedFields)
-            data.changedFields.forEach((field: MapField) => { fillMapField(field, this.allBuildings); });
+        if (boundData.changedFields)
+            boundData.changedFields.forEach((field) => { fillMapField(field, this.allBuildings); });
 
-        if (data.changedBuildings)
-            data.changedBuildings.forEach((building) => { this.fillBuilding(building); });
+        if (boundData.changedBuildings)
+            boundData.changedBuildings.forEach((building) => { this.fillBuilding(building); });
 
-        return data;
+        return boundData;
     };
 
     /**
@@ -158,4 +161,9 @@ export default class DataBinder {
 
         });
     };
+}
+
+export interface BoundMapChangesMessage {
+    changedFields?: MapField[];
+    changedBuildings?: Building[];
 }
