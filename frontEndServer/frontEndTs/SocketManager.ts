@@ -52,9 +52,9 @@ export default class SocketManager {
         });
 
         this.socket.on("init", (data: Player) => {
-            console.log("odebrano wydarzenie map: ", data);
+            console.log("odebrano wydarzenie init: ", data);
 
-            this.dataBinder.bindMapEventData(data);
+            this.dataBinder.bindInitEventData(data);
 
             //player is already instantiated in main.ts
             Object.assign(this.player, Object.fromEntries(Object.entries(data).filter(
@@ -92,23 +92,39 @@ export default class SocketManager {
 
             let boundData = this.dataBinder.bindMapChangesEvent(data);
 
-            if (boundData.changedFields)
-                this.player.observedMapFields.push(...boundData.changedFields);
+            if (boundData.changedFields) {
+                boundData.changedFields.forEach((changedField) => {
+                    if (!this.player.observedMapFields.find((observedMapField) => { return observedMapField == changedField; })) {
+                        //field is new for player
+                        this.player.observedMapFields.push(changedField);
+                    }
+                });
+                //only new fields are added, because dataBinder already updated known.
+            }
 
             if (boundData.changedBuildings)
                 boundData.changedBuildings.forEach((changedBuilding) => {
                     if (changedBuilding.ownerId == this.player.userId) {
-                        if (!this.player.buildings.find((checkedBuilding) => { return checkedBuilding.id == changedBuilding.id; })) {
+                        //building belongs to player
+                        let currentBuilding = this.player.buildings.find((checkedBuilding) => { return checkedBuilding.id == changedBuilding.id; });
+                        if (!currentBuilding) {
                             //if player has not got the building yet
                             this.player.buildings.push(changedBuilding);
                             this.graphics3dManager.createBuilding(changedBuilding);
+                        } else {
+                            Object.assign(currentBuilding, changedBuilding);
+                            this.graphics3dManager.updateBuilding(currentBuilding);
                         }
                     } else { //building is owned by opponent
                         let opponent = this.player.getOpponentById(changedBuilding.ownerId);
-                        if (!opponent.buildings.find((checkedBuilding) => { return checkedBuilding.id == changedBuilding.id; })) {
+                        let currentBuilding = opponent.buildings.find((checkedBuilding) => { return checkedBuilding.id == changedBuilding.id; });
+                        if (!currentBuilding) {
                             // if opponent has not got the building yet
                             opponent.buildings.push(changedBuilding);
                             this.graphics3dManager.createBuilding(changedBuilding);
+                        } else {
+                            Object.assign(currentBuilding, changedBuilding);
+                            this.graphics3dManager.updateBuilding(currentBuilding);
                         }
                     }
                 });

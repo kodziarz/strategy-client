@@ -313,21 +313,35 @@ export default class Graphics3dManager {
     };
 
     /**
-     * Updates {@link BuildingMesh} according to given data, or creates it, if
-     * it has not been created yet.
-     * @param building Building data, which creation or update of
-     * {@link BuildingMesh} is based on.
-     * @returns Created building mesh.
-     */
-    updateOrCreateBuilding = (building: Building): BuildingMesh => {
-        let buildingMesh = this.buildingMeshes.find((buildingMesh) => { return buildingMesh.buildingData.id == building.id; });
-        if (!buildingMesh) {
-            buildingMesh = this.createBuilding(building);
-        } else {
-            // probably something xd
-        }
+    * Updates building mesh.
+    * @param buildingData Building data, which the {@link BuildingMesh} is
+    * based on.
+    * @returns Updated building mesh.
+    */
+    updateBuilding = (buildingData: Building): BuildingMesh => {
+        let buildingMesh = this.buildingMeshes.find((buildingMesh) => { return buildingMesh.buildingData.id == buildingData.id; });
+        buildingMesh.position.set(buildingData.x, buildingData.y, 0);
+
         return buildingMesh;
     };
+
+    // probably redundant
+    // /**
+    //  * Updates {@link BuildingMesh} according to given data, or creates it, if
+    //  * it has not been created yet.
+    //  * @param building Building data, which creation or update of
+    //  * {@link BuildingMesh} is based on.
+    //  * @returns Created building mesh.
+    //  */
+    // updateOrCreateBuilding = (building: Building): BuildingMesh => {
+    //     let buildingMesh = this.buildingMeshes.find((buildingMesh) => { return buildingMesh.buildingData.id == building.id; });
+    //     if (!buildingMesh) {
+    //         buildingMesh = this.createBuilding(building);
+    //     } else {
+    //         this.updateBuilding(building);
+    //     }
+    //     return buildingMesh;
+    // };
 
     /**
      * Shows not displayed {@link MapFieldMesh}es of given {@link MapField}s' data.
