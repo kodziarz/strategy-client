@@ -87,7 +87,7 @@ export default class DataBinder {
             tmp.units = data.units.map((unitData) => {
                 let instantiatedUnit = instantiateUnit(unitData);
                 this.allUnits.push(instantiatedUnit);
-
+                return instantiatedUnit;
             });
 
         if (data.opponents)
