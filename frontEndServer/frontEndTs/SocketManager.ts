@@ -129,6 +129,33 @@ export default class SocketManager {
                     }
                 });
 
+            if (boundData.changedUnits)
+                boundData.changedUnits.forEach((changedUnit) => {
+                    if (changedUnit.ownerId == this.player.userId) {
+                        //building belongs to player
+                        let currentUnit = this.player.units.find((checkedUnit) => { return checkedUnit.id == changedUnit.id; });
+                        if (!currentUnit) {
+                            //if player has not got the building yet
+                            this.player.units.push(changedUnit);
+                            this.graphics3dManager.createUnit(changedUnit);
+                        } else {
+                            // Object.assign(currentBuilding, changedBuilding);
+                            this.graphics3dManager.updateUnit(currentUnit);
+                        }
+                    } else { //building is owned by opponent
+                        let opponent = this.player.getOpponentById(changedUnit.ownerId);
+                        let currentUnit = opponent.units.find((checkedUnit) => { return checkedUnit.id == changedUnit.id; });
+                        if (!currentUnit) {
+                            // if opponent has not got the building yet
+                            opponent.units.push(changedUnit);
+                            this.graphics3dManager.createUnit(changedUnit);
+                        } else {
+                            // Object.assign(currentBuilding, changedBuilding);
+                            this.graphics3dManager.updateUnit(currentUnit);
+                        }
+                    }
+                });
+
             if (boundData.changedFields)
                 this.graphics3dManager.discoverFields(boundData.changedFields);
         });

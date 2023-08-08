@@ -14,6 +14,8 @@ import MapFieldMesh from "./meshes/MapFieldMesh";
 import BuildingMesh from "./meshes/BuildingMesh";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import Unit from "../../../strategy-common/dataClasses/Unit";
+import UnitMesh from "./meshes/UnitMesh";
 
 /**
  * Manages displaying 3d map.
@@ -33,6 +35,7 @@ export default class Graphics3dManager {
     private cube: THREE.Mesh = null;
     private fieldsMeshes: MapFieldMesh[][];
     buildingMeshes: BuildingMesh[] = [];
+    unitMeshes: UnitMesh[] = [];
 
     private gameMechanicsInterval: NodeJS.Timer;
     private beginningTime: number;
@@ -241,16 +244,29 @@ export default class Graphics3dManager {
 
         // Renders Buildings
         if (this.player.buildings)
-            for (let i = 0; i < this.player.buildings.length; i++) {
-                let building: Building = this.player.buildings[i];
+            this.player.buildings.forEach((building) => {
                 this.createBuilding(building);
-            }
+            });
 
         //renders opponents' building
         if (this.player.opponents)
             this.player.opponents.forEach((opponent) => {
                 opponent.buildings.forEach((building) => {
                     this.createBuilding(building);
+                });
+            });
+
+        //renders units
+        if (this.player.units)
+            this.player.units.forEach((unit) => {
+                this.createUnit(unit);
+            });
+
+        //renders opponents' units
+        if (this.player.opponents)
+            this.player.opponents.forEach((opponent) => {
+                opponent.units.forEach((unit) => {
+                    this.createUnit(unit);
                 });
             });
 
@@ -304,7 +320,12 @@ export default class Graphics3dManager {
     createBuilding = (buildingData: Building): BuildingMesh => {
         let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(buildingData);
         this.scene.add(buildingMesh);
-        buildingMesh.position.set(buildingData.x, buildingData.y, 0);
+        this.buildingMeshes.push(buildingMesh);
+        buildingMesh.position.set(
+            buildingData.x,
+            buildingData.y,
+            buildingMesh.height / 2
+        );
 
         if (buildingData.ownerId != this.player.userId)
             buildingMesh.setOpponentsOwnership();
@@ -320,10 +341,55 @@ export default class Graphics3dManager {
     */
     updateBuilding = (buildingData: Building): BuildingMesh => {
         let buildingMesh = this.buildingMeshes.find((buildingMesh) => { return buildingMesh.buildingData.id == buildingData.id; });
-        buildingMesh.position.set(buildingData.x, buildingData.y, 0);
+        buildingMesh.position.set(
+            buildingData.x,
+            buildingData.y,
+            buildingMesh.height / 2
+        );
 
         return buildingMesh;
     };
+
+
+    /**
+     * Creates unit mesh and adds it to {@link scene}.
+     * @param unitData Unit data, which the {@link UnitMesh} is
+     * based on.
+     * @returns Created unit mesh.
+     */
+    createUnit = (unitData: Unit): UnitMesh => {
+        let unitMesh = this.meshes3dCreator.getDistinguishedTypeUnitMesh(unitData);
+        this.scene.add(unitMesh);
+        this.unitMeshes.push(unitMesh);
+        unitMesh.position.set(
+            unitData.x,
+            unitData.y,
+            unitMesh.height / 2
+        );
+
+        if (unitData.ownerId != this.player.userId)
+            unitMesh.setOpponentsOwnership();
+
+        return unitMesh;
+    };
+
+    /**
+    * Updates unit mesh.
+    * @param unitData Unit data, which the {@link UnitMesh} is
+    * based on.
+    * @returns Updated unit mesh.
+    */
+    updateUnit = (unitData: Unit): UnitMesh => {
+        let unitMesh = this.unitMeshes.find((unitMesh) => { return unitMesh.unitData.id == unitData.id; });
+        unitMesh.position.set(
+            unitData.x,
+            unitData.y,
+            unitMesh.height / 2
+        );
+
+        return unitMesh;
+    };
+
 
     // probably redundant
     // /**

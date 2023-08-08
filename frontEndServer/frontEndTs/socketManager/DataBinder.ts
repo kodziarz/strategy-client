@@ -64,6 +64,7 @@ export default class DataBinder {
         }
 
         let buildingDatasToFill: Building[] = [];
+        let unitDatasToFill: Unit[] = [];
 
         if (data.opponents)
             data.opponents.forEach((opponent) => {
@@ -72,6 +73,12 @@ export default class DataBinder {
                     this.allBuildings.push(instantiatedBuilding);
                     buildingDatasToFill.push(instantiatedBuilding);
                     return instantiatedBuilding;
+                });
+                opponent.units = opponent.units.map((unitData) => {
+                    let instantiatedUnit = instantiateUnit(unitData);
+                    this.allUnits.push(instantiatedUnit);
+                    unitDatasToFill.push(instantiatedUnit);
+                    return instantiatedUnit;
                 });
             });
 
@@ -87,6 +94,7 @@ export default class DataBinder {
             tmp.units = data.units.map((unitData) => {
                 let instantiatedUnit = instantiateUnit(unitData);
                 this.allUnits.push(instantiatedUnit);
+                unitDatasToFill.push(instantiatedUnit);
                 return instantiatedUnit;
             });
 
@@ -104,10 +112,9 @@ export default class DataBinder {
             this.fillBuilding(building);
         });
 
-        if (tmp.units)
-            tmp.units.forEach((unit: Unit) => {
-                this.fillUnit(unit);
-            });
+        unitDatasToFill.forEach((unit: Unit) => {
+            this.fillUnit(unit);
+        });
 
 
         return Object.assign(data, tmp);

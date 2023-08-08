@@ -1,18 +1,17 @@
 import * as THREE from "three";
-import MainBuilding from "../../../../../strategy-common/dataClasses/buildings/MainBuilding";
-// import SETTINGS from "../SETTINGS";
-import BuildingMesh from "../BuildingMesh";
-export default class MainBuildingMesh extends BuildingMesh {
+import Builder from "../../../../../strategy-common/dataClasses/units/Builder";
+import UnitMesh from "../UnitMesh";
+export default class BuilderMesh extends UnitMesh {
 
     // mainBuildingData: MainBuilding;
-    constructor(mainBuilding: MainBuilding) {
+    constructor(builder: Builder) {
         const geometry = new THREE.BoxGeometry(
-            mainBuilding.width,
-            mainBuilding.length,
-            10
+            builder.width,
+            builder.length,
+            4
         );
         const material = new THREE.MeshBasicMaterial({ color: 0x888888 });
-        super(geometry, material, mainBuilding);
+        super(geometry, material, builder);
         this.height = geometry.parameters.depth;
 
         // this.mainBuildingData = mainBuilding;

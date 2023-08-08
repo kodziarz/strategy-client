@@ -33,7 +33,7 @@ export default class BuildingPlaceIndicator {
                 this.currentBuildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
                 this.currentBuildingMesh.setTemporaryMode();
                 this.graphics3dManager.scene.add(this.currentBuildingMesh);
-                this.currentBuildingMesh.position.set(0, 0, 0);
+                this.currentBuildingMesh.position.set(0, 0, this.currentBuildingMesh.height / 2);
                 console.log("current building mesh: ", this.currentBuildingMesh);
 
                 // console.log("this.graphics3dManager: ", this.graphics3dManager);

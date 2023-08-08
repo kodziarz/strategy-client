@@ -1,14 +1,14 @@
 import * as THREE from "three";
 import { BufferGeometry, Material } from "three";
-import Building from "./../../../../strategy-common/dataClasses/Building";
-export default abstract class BuildingMesh extends THREE.Mesh {
+import Unit from "../../../../strategy-common/dataClasses/Unit";
+export default abstract class UnitMesh extends THREE.Mesh {
 
-    buildingData: Building;
+    unitData: Unit;
     height: number;
 
-    constructor(geometry: BufferGeometry, material: Material, building: Building) {
+    constructor(geometry: BufferGeometry, material: Material, unit: Unit) {
         super(geometry, material);
-        this.buildingData = building;
+        this.unitData = unit;
     }
 
     /**
