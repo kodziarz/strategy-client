@@ -33,7 +33,8 @@ export default class BuildingPlaceIndicator {
                 this.currentBuildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
                 this.currentBuildingMesh.setTemporaryMode();
                 this.graphics3dManager.scene.add(this.currentBuildingMesh);
-                this.currentBuildingMesh.position.set(0, 0, this.currentBuildingMesh.height / 2);
+                this.currentBuildingMesh.position.x = 0;
+                this.currentBuildingMesh.position.y = 0;
                 console.log("current building mesh: ", this.currentBuildingMesh);
 
                 // console.log("this.graphics3dManager: ", this.graphics3dManager);
@@ -59,11 +60,8 @@ export default class BuildingPlaceIndicator {
         if (intersects.length > 0) {
             // console.log(intersects[0]);
             const intersectionPoint = intersects[0].point;
-            this.currentBuildingMesh.position.set(
-                intersectionPoint.x,
-                intersectionPoint.y,
-                intersectionPoint.z
-            );
+            this.currentBuildingMesh.position.x = intersectionPoint.x;
+            this.currentBuildingMesh.position.y = intersectionPoint.y;
             this.currentBuildingMesh.buildingData.x = intersectionPoint.x;
             this.currentBuildingMesh.buildingData.y = intersectionPoint.y;
         }

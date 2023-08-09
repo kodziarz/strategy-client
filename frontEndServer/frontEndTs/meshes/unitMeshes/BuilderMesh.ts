@@ -13,6 +13,11 @@ export default class BuilderMesh extends UnitMesh {
         const material = new THREE.MeshBasicMaterial({ color: 0x888888 });
         super(geometry, material, builder);
         this.height = geometry.parameters.depth;
+        this.position.set(
+            builder.x,
+            builder.y,
+            this.height / 2
+        );
 
         // this.mainBuildingData = mainBuilding;
     }

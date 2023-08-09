@@ -74,11 +74,6 @@ export default class SocketManager {
         this.socket.on("buildingPlaced", (placedBuilding: BuildingWithIdentifiers) => {
             let building = this.dataBinder.receivePlacedBuilding(placedBuilding);
             let mesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(building);
-            mesh.position.set(
-                mesh.buildingData.x,
-                mesh.buildingData.y,
-                0
-            );
             this.graphics3dManager.scene.add(mesh);
             this.buildingPlaceIndicator.clear();
         });

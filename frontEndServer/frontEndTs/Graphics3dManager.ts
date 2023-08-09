@@ -321,11 +321,6 @@ export default class Graphics3dManager {
         let buildingMesh = this.meshes3dCreator.getDistinguishedTypeBuildingMesh(buildingData);
         this.scene.add(buildingMesh);
         this.buildingMeshes.push(buildingMesh);
-        buildingMesh.position.set(
-            buildingData.x,
-            buildingData.y,
-            buildingMesh.height / 2
-        );
 
         if (buildingData.ownerId != this.player.userId)
             buildingMesh.setOpponentsOwnership();
@@ -361,11 +356,6 @@ export default class Graphics3dManager {
         let unitMesh = this.meshes3dCreator.getDistinguishedTypeUnitMesh(unitData);
         this.scene.add(unitMesh);
         this.unitMeshes.push(unitMesh);
-        unitMesh.position.set(
-            unitData.x,
-            unitData.y,
-            unitMesh.height / 2
-        );
 
         if (unitData.ownerId != this.player.userId)
             unitMesh.setOpponentsOwnership();
