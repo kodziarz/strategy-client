@@ -44,13 +44,11 @@ export default class DataBinder {
      */
     bindInitEventData = (data: Player) => {
 
-        if (this.fieldsMap == undefined) {
-            this.fieldsMap = [];
-            for (let x = 0; x < data.columns; x++) {
-                this.fieldsMap[x] = [];
-                for (let y = 0; y < data.rows; y++) {
-                    this.fieldsMap[x][y] = new MapFieldPlaceholder();
-                }
+        this.fieldsMap = [];
+        for (let x = 0; x < data.columns; x++) {
+            this.fieldsMap[x] = [];
+            for (let y = 0; y < data.rows; y++) {
+                this.fieldsMap[x][y] = new MapFieldPlaceholder();
             }
         }
 
@@ -148,30 +146,7 @@ export default class DataBinder {
                 if (currentFromFieldsMap instanceof MapFieldPlaceholder) {
                     // if field is new for us
                     let mapField = instantiateMapField(mapFieldData);
-
-                    //connect field to buildings waiting for it
-                    currentFromFieldsMap.getConnectedBuildings().forEach((building) => {
-                        building.occupiedFields.forEach((occupiedField: MapFieldIdentifier, i, array) => {
-                            if (
-                                occupiedField.column == mapField.column
-                                && occupiedField.row == mapField.row
-                            ) {
-                                array[i] = mapField;
-                            }
-                        });
-                    });
-
-                    //connect field to units waiting for it
-                    currentFromFieldsMap.getConnectedUnits().forEach((unit) => {
-                        unit.occupiedFields.forEach((occupiedField: MapFieldIdentifier, i, array) => {
-                            if (
-                                occupiedField.column == mapField.column
-                                && occupiedField.row == mapField.row
-                            ) {
-                                array[i] = mapField;
-                            }
-                        });
-                    });
+                    currentFromFieldsMap.fillConnectiedObjects(mapField);
                     //add to fieldsMap
                     this.fieldsMap[mapFieldData.column][mapFieldData.row] = mapField;
                     return mapField;
