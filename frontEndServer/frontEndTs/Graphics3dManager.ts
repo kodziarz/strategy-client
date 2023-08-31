@@ -16,6 +16,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import Unit from "../../../strategy-common/dataClasses/Unit";
 import UnitMesh from "./meshes/UnitMesh";
+import ObjectsSelector from "./graphics3dManager/ObjectsSelector";
+import UnitMover from "./graphics3dManager/UnitMover";
 
 /**
  * Manages displaying 3d map.
@@ -60,9 +62,13 @@ export default class Graphics3dManager {
     constructor(
         private meshes3dCreator: Meshes3dCreator,
         private buildingPlaceIndicator: BuildingPlaceIndicator,
+        private objectsSelector: ObjectsSelector,
+        private unitMover: UnitMover
     ) {
         this.player = Container.get(Player);
+        objectsSelector.setGraphics3dManager(this);
         buildingPlaceIndicator.setGraphics3dManager(this);
+        unitMover.setUnitMeshes(this.unitMeshes);
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -95,6 +101,7 @@ export default class Graphics3dManager {
         this.addRootDivEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => (this.rootDiv.addEventListener(type, listener, options));
         this.removeRootDivEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void => (this.rootDiv.removeEventListener(type, listener, options));
         window.addEventListener('resize', this.resizeRenderer);
+        this.objectsSelector.activate();
     };
 
 
@@ -127,7 +134,9 @@ export default class Graphics3dManager {
     initGameMechanics = (deltaTime: number, intervenedTime: number) => {
 
         // this.moveCube(deltaTime, intervenedTime);
+        let currentTime = Date.now();
         this.moveCamera(deltaTime);
+        this.unitMover.move(intervenedTime, deltaTime, currentTime);
     };
 
     // /**

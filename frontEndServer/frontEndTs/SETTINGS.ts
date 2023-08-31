@@ -20,5 +20,5 @@ export default class SETTINGS {
      */
     static readonly cameraVelocityToZPositionCoeffictient = 2;
 
-    static readonly GAME_MECHANICS_INTERVAL = 50;
+    static readonly GAME_MECHANICS_INTERVAL = 50; //[ms]
 };

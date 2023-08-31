@@ -1,5 +1,5 @@
 import { Service } from "typedi";
-import { fillMapField, instantiateBuilding, instantiateMapField, instantiateOpponent, instantiateUnit } from "../../../../strategy-common/classInstantiatingService";
+import { fillMapField, findUnit, instantiateBuilding, instantiateMapField, instantiateOpponent, instantiateUnit } from "../../../../strategy-common/classInstantiatingService";
 import Building from "../../../../strategy-common/dataClasses/Building";
 import MapField from "../../../../strategy-common/dataClasses/MapField";
 import Opponent from "../../../../strategy-common/dataClasses/Opponent";
@@ -9,6 +9,7 @@ import MapFieldPlaceholder from "./MapFieldPlaceholder";
 import BuildingWithIdentifiers from "../../../../strategy-common/socketioMessagesClasses/BuildingWithIdentifiers";
 import Unit from "../../../../strategy-common/dataClasses/Unit";
 import MapFieldIdentifier from "../../../../strategy-common/socketioMessagesClasses/MapFieldIdentifier";
+import UnitIdentifier from "../../../../strategy-common/socketioMessagesClasses/UnitIdentifier";
 
 /**
  * Instantiates and binds received JSON data. Used by {@link SocketManager}.
@@ -33,7 +34,7 @@ export default class DataBinder {
      * It is filled by the data from {@link SocketManager} during execution of
      * binidng methods.
      */
-    private fieldsMap: MapField[][] | MapFieldPlaceholder[][];
+    readonly fieldsMap: (MapField | MapFieldPlaceholder)[][] = [];
 
     /**
      * Instantiates and binds data from "init" event. All included
@@ -44,7 +45,7 @@ export default class DataBinder {
      */
     bindInitEventData = (data: Player) => {
 
-        this.fieldsMap = [];
+        // this.fieldsMap = [];
         for (let x = 0; x < data.columns; x++) {
             this.fieldsMap[x] = [];
             for (let y = 0; y < data.rows; y++) {
@@ -146,7 +147,7 @@ export default class DataBinder {
                 if (currentFromFieldsMap instanceof MapFieldPlaceholder) {
                     // if field is new for us
                     let mapField = instantiateMapField(mapFieldData);
-                    currentFromFieldsMap.fillConnectiedObjects(mapField);
+                    currentFromFieldsMap.fillConnectedObjects(mapField);
                     //add to fieldsMap
                     this.fieldsMap[mapFieldData.column][mapFieldData.row] = mapField;
                     return mapField;
@@ -199,6 +200,10 @@ export default class DataBinder {
             boundData.changedUnits.forEach((unit) => { this.fillUnit(unit); });
 
         return boundData;
+    };
+
+    findUnit = (unitIdentifier: UnitIdentifier) => {
+        return findUnit(unitIdentifier, this.allUnits);
     };
 
     /**

@@ -6,13 +6,25 @@ import Graphics3dManager from "./Graphics3dManager";
 import envSettings from '../../settings.json';
 import BuildingPlaceIndicator from "./graphics3dManager/BuildingPlaceIndicator";
 import Meshes3dCreator from "./graphics3dManager/Meshes3dCreator";
-import { instantiateOpponent, instantiateBuilding, instantiateMapField, fillMapField } from "./../../../strategy-common/classInstantiatingService";
+import { instantiateOpponent, instantiateBuilding, instantiateMapField, fillMapField, findUnit } from "./../../../strategy-common/classInstantiatingService";
 import Player from "./../../../strategy-common/dataClasses/Player";
 import Opponent from "../../../strategy-common/dataClasses/Opponent";
 import DataBinder from "./socketManager/DataBinder";
 import MapChangesMessage from "./../../../strategy-common/socketioMessagesClasses/MapChangesMessage";
 import BuildingWithIdentifiers from "../../../strategy-common/socketioMessagesClasses/BuildingWithIdentifiers";
 import Unit from "../../../strategy-common/dataClasses/Unit";
+import MoveUnitMessage from "./../../../strategy-common/socketioMessagesClasses/MoveUnitMessage";
+import Point2d from "../../../strategy-common/geometryClasses/Point2d";
+import ObjectsSelector from "./graphics3dManager/ObjectsSelector";
+import UnitMoveResponse from "./../../../strategy-common/socketioMessagesClasses/UnitMoveResponse";
+import { v4 as uuid } from "uuid";
+import Movement from "./../../../strategy-common/geometryClasses/Movement";
+import UnitMover from "./graphics3dManager/UnitMover";
+import Path from "../../../strategy-common/geometryClasses/Path";
+import { getCrossedMapFieldsForLine, getMapFieldOfPoint } from "../../../strategy-common/mapService";
+import MapField from "../../../strategy-common/dataClasses/MapField";
+import FullPath from "./FullPath";
+import MapFieldPlaceholder from "./socketManager/MapFieldPlaceholder";
 
 /**
  * Provides methods for socket communication with server.
@@ -21,12 +33,15 @@ import Unit from "../../../strategy-common/dataClasses/Unit";
 export default class SocketManager {
     private readonly socket: Socket;
     private player: Player;
+    private readonly unitMovementMessages: MoveUnitMessage[] = [];
 
     constructor(
         private readonly graphics3dManager: Graphics3dManager,
         private readonly buildingPlaceIndicator: BuildingPlaceIndicator,
+        private readonly objectsSelector: ObjectsSelector,
         private readonly meshes3dCreator: Meshes3dCreator,
-        private readonly dataBinder: DataBinder
+        private readonly dataBinder: DataBinder,
+        private readonly unitMover: UnitMover
     ) {
         this.socket = io(`ws://${envSettings.serverAddress}`, {
             transportOptions: {
@@ -39,6 +54,8 @@ export default class SocketManager {
         });
         this.setEventListeners();
         this.player = Container.get(Player);
+        objectsSelector.setSocketManager(this);
+        unitMover.setFieldsMap(dataBinder.fieldsMap);
     }
 
     /**
@@ -154,6 +171,43 @@ export default class SocketManager {
             if (boundData.changedFields)
                 this.graphics3dManager.discoverFields(boundData.changedFields);
         });
+
+        this.socket.on("confirmUnitMove", (data: UnitMoveResponse) => {
+            let moveMessage = this.unitMovementMessages.find((message) => { return data.id == message.id; });
+            let unit = this.dataBinder.findUnit(moveMessage.unit);
+            let fullPath = new FullPath();
+
+            let start;
+            let end = new Point2d(unit.x, unit.y);
+            for (let i = 0; i < moveMessage.pathPoints.length; i++) {
+                start = end;
+                end = moveMessage.pathPoints[i];
+
+                let { mapPositions, crossings } = getCrossedMapFieldsForLine(start, end);
+                fullPath.mapFields = mapPositions.map((position) => {
+                    let field = this.dataBinder.fieldsMap[position.column][position.row];
+                    if (field instanceof MapFieldPlaceholder) {
+                        field.subscribe(fullPath);
+                    }
+                    return field;
+                });
+                fullPath.points.push(...crossings, end);
+            };
+            this.unitMover.setMovement(
+                data.id,
+                unit,
+                fullPath,
+                data.start
+            );
+        });
+
+        this.socket.on("rejectUnitMove", (data: UnitMoveResponse) => {
+            this.unitMovementMessages.splice(
+                this.unitMovementMessages.indexOf(this.unitMovementMessages.find((message) => { return message.id == data.id; })),
+                1
+            );
+            throw new Error("Unit cannot be moved straight to indicated point.");
+        });
     };
 
     /**
@@ -168,7 +222,20 @@ export default class SocketManager {
         this.socket.emit("building", building);
     };
 
+    moveUnit = (unit: Unit, pathPoints: Point2d[]) => {
+        let movementMessage = {
+            id: uuid(),
+            unit: unit.getIdentifier(),
+            pathPoints: pathPoints
+        } as MoveUnitMessage;
+        this.unitMovementMessages.push(movementMessage);
+        this.socket.emit("moveUnit", movementMessage);
+        console.log("dane do przesunięcia jednostki: ", movementMessage);
+
+    };
+
     createUnit = (unit: Unit) => {
         this.socket.emit("unit", unit);
     };
+
 }
