@@ -120,6 +120,7 @@ export default class UnitMover {
         }
         if (ongoingMovement) {
             this.movements.splice(ongoingMovementIndex, 1);
+            this.fullPaths.splice(ongoingMovementIndex, 1);
             // server sends movement report just before changing the trace of unit
             // so the unit does not need to be additionally moved.
         }

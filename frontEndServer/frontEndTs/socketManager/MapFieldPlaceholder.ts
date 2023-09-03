@@ -6,7 +6,7 @@ import Unit from "../../../../strategy-common/dataClasses/Unit";
 export default class MapFieldPlaceholder {
     private connectedBuildings: Building[] = [];
     private connectedUnits: Unit[] = [];
-    private mapFieldHolders: MapFieldHolder[];
+    private mapFieldHolders: MapFieldHolder[] = [];
 
     fillConnectedObjects = (mapField: MapField) => {
         this.connectedBuildings.forEach((building) => {
