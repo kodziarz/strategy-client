@@ -25,6 +25,7 @@ import { getCrossedMapFieldsForLine, getMapFieldOfPoint } from "../../../strateg
 import MapField from "../../../strategy-common/dataClasses/MapField";
 import FullPath from "./FullPath";
 import MapFieldPlaceholder from "./socketManager/MapFieldPlaceholder";
+import ReportUnitMoveMessage from "./../../../strategy-common/socketioMessagesClasses/ReportUnitMoveMessage";
 
 /**
  * Provides methods for socket communication with server.
@@ -175,6 +176,7 @@ export default class SocketManager {
         this.socket.on("confirmUnitMove", (data: UnitMoveResponse) => {
             let moveMessage = this.unitMovementMessages.find((message) => { return data.id == message.id; });
             let unit = this.dataBinder.findUnit(moveMessage.unit);
+            this.unitMover.finishMovementOfUnit(unit, data.start);
             let fullPath = new FullPath();
 
             let start;
@@ -207,6 +209,10 @@ export default class SocketManager {
                 1
             );
             throw new Error("Unit cannot be moved straight to indicated point.");
+        });
+
+        this.socket.on("reportUnitMove", (data: ReportUnitMoveMessage) => {
+            this.unitMover.updateMovement(data);
         });
     };
 

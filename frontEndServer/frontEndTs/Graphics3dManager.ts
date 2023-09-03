@@ -34,7 +34,6 @@ export default class Graphics3dManager {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     private renderer = new THREE.WebGLRenderer();
 
-    private cube: THREE.Mesh = null;
     private fieldsMeshes: MapFieldMesh[][];
     buildingMeshes: BuildingMesh[] = [];
     unitMeshes: UnitMesh[] = [];
@@ -70,8 +69,6 @@ export default class Graphics3dManager {
         buildingPlaceIndicator.setGraphics3dManager(this);
         unitMover.setUnitMeshes(this.unitMeshes);
 
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         let axes = new THREE.AxesHelper(500);
         this.scene.add(axes);
 
@@ -136,7 +133,7 @@ export default class Graphics3dManager {
         // this.moveCube(deltaTime, intervenedTime);
         let currentTime = Date.now();
         this.moveCamera(deltaTime);
-        this.unitMover.move(intervenedTime, deltaTime, currentTime);
+        this.unitMover.moveUnits(currentTime);
     };
 
     // /**
@@ -289,11 +286,12 @@ export default class Graphics3dManager {
         // plane to get indicated point on a map
         if (!this.surface) {
             const geo = new THREE.PlaneGeometry(this.player.columns * SETTINGS.mapFieldSide, this.player.rows * SETTINGS.mapFieldSide);
-            const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+            // const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 0.5 });
+            const material = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0 });
             this.surface = new THREE.Mesh(geo, material);
             this.surface.position.x = (this.player.columns / 2) * SETTINGS.mapFieldSide;
             this.surface.position.y = (this.player.rows / 2) * SETTINGS.mapFieldSide;
-            this.surface.position.z = -1;
+            this.surface.position.z = 1;
             this.scene.add(this.surface);
         }
 
